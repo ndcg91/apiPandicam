@@ -1,8 +1,27 @@
 var exports = module.exports = {};
+var config	= require('./config.js');
+var server  = config.server;
+var io 			= require("socket.io").listen(server, { origins:'*:*'});
 var Group 	= require('./database/groups.js');
 
 
-exports.handleClient = function (socket) {
+io.on("connection", handleClient);
+
+/////////ONE SOCKET FOR EACH GROUP
+Group.find({},function(err,groups){
+	groups.forEach(function(group){
+		var s = io.of('/'+ group._id);
+		s.emit('init','ok');
+		s.on('message',function(data){
+			s.emit('message',data);
+		});
+
+	})
+})
+
+
+
+var handleClient = function (socket) {
 	// we've got a client connection
 	console.log("client connected");
 	socket.emit("connected_now", { connected: 'connect' });
@@ -53,8 +72,12 @@ exports.handleClient = function (socket) {
 
 };
 
-
-
+exports.removeGroup = function(userID,groupID){
+	io.sockets.in(userID).emit('group_deleted', {groupID:groupID});
+}
+exports.newGroup = function(userID,group){
+	io.sockets.in(userID).emit('new_group', group);
+}
 
 
 

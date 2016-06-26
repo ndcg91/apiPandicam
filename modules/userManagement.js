@@ -132,3 +132,14 @@ exports.getPics = function(req,res){
     res.send(imagesPerGroup);
   });
 }
+
+
+exports.getGroup = function(req,res){
+  var user = req.user;
+  var userGroups = user.belongsTo;
+  var Ids=userGroups.map(function(a){return a.to});
+  Group.find({_id: {$in:Ids}},function(err,groups){
+    if (err) res.send(err);
+    res.send(groups);
+  });
+}
