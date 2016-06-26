@@ -16,7 +16,7 @@ var io 			  = require("socket.io").listen(server, { origins:'*:*'});
 
 
 
-var port 									= process.env.PORT || 8443;
+var port 									= process.env.PORT || 8444;
 var router 								= express.Router();
 var bodyParser 						= require('body-parser');
 var mongoose							= require('mongoose');
@@ -63,4 +63,3 @@ exports.port            = port;
 exports.io              = io;
 
 var SocketManager       = require('./socket.js');
-io.on("connection", SocketManager.handleClient);
