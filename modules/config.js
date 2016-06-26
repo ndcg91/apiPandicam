@@ -59,6 +59,4 @@ exports.apn             = apn;
 exports.multer          = multer;
 exports.app             = app;
 exports.port            = port;
-exports.io              = io;
-
 var SocketManager       = require('./socket.js');

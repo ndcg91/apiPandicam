@@ -17,7 +17,6 @@ var multer								= config.multer;
 var app										= config.app;
 var server								= config.server;
 var port									= config.port;
-var io 										= config.io;
 /*++++++++++++++++++++++++++++++++++++++++++++
 ****Comment Section Seting the api parameters+
 **********************************************/
