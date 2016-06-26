@@ -130,5 +130,4 @@ router.route("/file/remove").post(pandicamAuth.checkGroupAuth,pandicamGM.removeF
 
 app.use('/api',router);
 server.listen(port);
-io.on("connection", SocketManager.handleClient);
 console.log('api started at port' + port);

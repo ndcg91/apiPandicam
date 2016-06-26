@@ -1,10 +1,10 @@
 var exports = module.exports = {};
 var config	= require('./config.js');
 var server  = config.server;
-var io 			= config.io;
+var io 			= require("socket.io").listen(server, { origins:'*:*'});
 var Group 	= require('./database/groups.js');
 
-
+console.log("socket init");
 
 /////////ONE SOCKET FOR EACH GROUP
 Group.find({},function(err,groups){
@@ -20,7 +20,7 @@ Group.find({},function(err,groups){
 
 
 
-exports.handleClient = function(socket) {
+var handleClient = function(socket) {
 	// we've got a client connection
 	console.log("client connected");
 	socket.emit("connected_now", { connected: 'connect' });
@@ -78,6 +78,7 @@ exports.newGroup = function(userID,group){
 	io.sockets.in(userID).emit('new_group', group);
 }
 
+io.on("connection", SocketManager.handleClient);
 
 
 //init
