@@ -1,17 +1,15 @@
 var express 		= require('express');
-var session 		= require('express-session');
 var cors 		= require('cors');
 var app 		= express();
 var server 		= require('http').createServer(app);
-var io 			= require("socket.io").listen(server, { origins:'*:*'});
 var https		= require('https');
 var bodyParser 		= require('body-parser');
 var mongoose		= require('mongoose');
 var jwt			= require('jsonwebtoken');
 var morgan		= require('morgan');
-var User 		= require('./modules/user.js');
-var Group 		= require('./modules/groups.js');
-var File 		= require('./modules/files.js');
+var User 		= require('./modules/daabase/user.js');
+var Group 		= require('./modules/database/groups.js');
+var File 		= require('./modules/database/files.js');
 var Email = require('./modules/email.js');
 var localStorage 	= require('localStorage');
 var archiver 		= require('archiver');
@@ -19,13 +17,15 @@ var async = require('async');
 var request = require('request');
 var fs = require('fs');
 var qr = require('qr-js');
-var privateKey = fs.readFileSync('key.pem');
-var exif = require('exif-parser');
 var gm = require('gm');
-var certificate = fs.readFileSync('cert.pem');
-// Locate your certificate
-var join = require('path').join
-	, pfx = join(__dirname, '/_certs/pandicamPush.p12'), pfxp = join(__dirname, '/_certs/pandicamPushProd.p12');
+var io 			= require("socket.io").listen(server, { origins:'*:*'});
+var pandicamApn = require('./modules/apn.js');
+var pandicamSocket = require('./modules/socket.js');
+var pandicamRegister = require('./modules/register.js');
+var pandicamfileManager = require('./modules/fileManager.js');
+
+
+
 
 var multer = require('multer');
 
@@ -45,22 +45,11 @@ var upload = multer({ //multer settings
 	storage: storage
 }).single('file');
 
-var apn = require('apn');
-
-var options = {
-	pfx: pfx,
-	production:false
-};
-var apnConnection = new apn.Connection(options,function(err){
-	if (err){
-		console.log(err);
-	}
-	else{
-		console.log("ok apn set");
-	}
-});
 
 
+/*++++++++++++++++++++++++++++++++++++++++++++
+****Comment Section Seting the api parameters+
+**********************************************/
 mongoose.connect('mongodb://pandicamProject:TemporaL1718@188.166.68.124:27017/pandicam');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -73,7 +62,8 @@ app.use(function(req, res, next) {
 	res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 	next();
 });
-//app.use(session({secret: 'PandicaM1718'}));
+
+
 var port = process.env.PORT || 8080;
 
 
@@ -88,286 +78,63 @@ router.get('/', function(req, res) {
 	res.json({message: 'ok api set'});
 });
 
-
-var handleClient = function (socket) {
-	// we've got a client connection
-	console.log("client connected");
-	socket.emit("connected_now", { connected: 'connect' });
-	socket.on('join',function(data){
-		console.log("joining to group"  + data.groupId);
-		//socket.leave(data.groupId);
-		socket.join(data.groupId);
-	});
-	socket.on('leave',function(data){
-		socket.leave(data.groupId)
-	});
-	socket.on('joinSingle',function(data){
-		socket.join(data.username);
-	})
-	socket.on('broadcast',function(data){
-		console.log(data);
-		io.to(data.groupId).emit(data.event,data.data);
-	})
-	socket.on('login',function(data){
-		console.log("user loged in");
-		socket.join(data.userID);
-	})
-
-	socket.on('getPics',function(data){
-		console.log("get pics called");
-		var clientID = data.client;
-		User.find({_id:clientID},function(err,user){
-			if (err) console.log(err);
-			if (user.length == 1){
-				var userGroups = user[0].belongsTo;
-				var Ids=userGroups.map(function(a){return a.to});
-				Group.find({_id: {$in:Ids}},function(err,groups){
-					if (err) res.send(err);
-					var imagesPerGroup = groups.map(function(a){
-						return {groupName:a.groupName, groupID:a._id, images:a.images};
-					});
-					socket.emit("all_img",imagesPerGroup);
-				});
-			}
-		});
-	})
-
-
-};
-
-
-/////////ONE SOCKET FOR EACH GROUP
-Group.find({},function(err,groups){
-	groups.forEach(function(group){
-		var s = io.of('/'+ group._id);
-		s.emit('init','ok');
-		s.on('message',function(data){
-			s.emit('message',data);
-		});
-
-	})
-	//console.log(groups);
-})
+/*++++++++++++++++++++++++++
+++END SETTING parameters +++
+***************************/
 
 
 
-io.on("connection", handleClient);
-router.route('/backup')
-	.post(function(req,res){
-	Email.push(req,res);
-	console.log(req.body.commits[0]);
-	//res.send(200);
-})
-
-router.route('/contact')
-	.post(function(req,res){
-		console.log(req.body);
-		Email.contactForm(req,res)
-	})
-
-
-router.route('/user/register')
-	.post(function(req,res){
-		var user= new User();
-		user.username= req.body.username;
-		user.password= req.body.password;
-		user.free = true;
-		user.email = req.body.email;
-		user.deviceId = req.body.deviceId;
-		if (user.username == null) res.send({message:"username cannot be null"});
-		if (user.password == null) res.send({message:"password cannot be null"});
-		if (user.free == null) res.send({message:"free cannot be null"});
-		if (user.email == null) res.send({message:"email cannot be null"});
-		var required = true;
-		if (user.username == null || user.password == null || user.free == null || user.email == null){
-			required = false;
-		}
-		else {
-			required = true;
-		}
-		if (required){
-			User.findOne({username:req.body.username}, function(err,fetchuser){
-				if(err)
-					res.send(err);
-				if (fetchuser == null){
-					User.findOne({email:req.body.email},function(err,emailUser){
-						if (err) res.send(err);
-						if (emailUser == null){
-							user.save(function(err,user){
-                                                		if (err) res.send(err);
-                                                		user.token = jwt.sign(user,'secretkey',{noTimestamp:true});
-                                                		user.save(function(err,user){
-                                                        		if (err) res.send(err);
-                                                        		res.json({message: 'User created!',id: user.id, token:user.token});
-                                                		});
-                                        		});
-
-						}
-						else{
-							res.json({message:"please chose another email"});
-						}
-					});
-				}
-				else{
-					res.json({message:"please chose another user"});
-				}
-			});
-		}
-	});
+/**********************************
+*			LOGIN AND register					*
+***********************************/
+//Register
+router.route('/user/register').post(pandicamRegister.register);
+//LOGIN
+router.route("/user/login")	.post(pandicamRegister.login);
+/**********************************
+*			END LOGIN AND register			*
+***********************************/
 
 
 
-
-router.route('/email/new')
-	.post(function(req,res){
-		Email.send(req,res)
-	});
-
-router.route('/email/contactUs')
-	.post(function(req,res){
-		Email.contactUs(req,res);
-	});
-
-router.route('/user/listAll')
-	.get(checkAuth,function(req,res){
-		User.findOne({token: req.token},function(err,user){
-			if (err){
-				res.send(error);
-			}
-			else if (user != null){
-				User.find(function(err,users){
-					if(err)
-						res.send(err);
-					res.json({currentUser:user,alluser:users});
-				});
-			}
-			else{
-				console.log(req.token);
-				res.send(403);
-			}
-		});
-	});
+/**********************************
+*			EMAIL FUNCTIONS   					*
+***********************************/
+router.route('/contact').post(Email.contactForm);
+router.route('/email/new').post(Email.send);
+router.route('/email/contactUs').post(Email.contactUs);
+/**********************************
+*			END EMAIL FUNCTIONS					*
+***********************************/
 
 
 
+/**********************************
+*			UPLOAD FUNCTIONS		  			*
+***********************************/
 router.route('/user/upload')
-	.post(checkGroupAuth,multer({dest: '/app/pandicam/uploads/'}).single('file'),function(req,res){
-		Group.findOne({token: req.groupToken},function(err,group){ //change later to Group
-			if (err){
-				res.send(error);
-			}
-			else if (group != null){
-				// handle upload;
-				console.log("group finded");
-				//Mark: create directories in case they dont exist
-				var dir = '/app/pandicam/uploads/'+group._id;
-				if (!fs.existsSync(dir)){
-    					fs.mkdirSync(dir);
-				}
-				var dirFile = dir + '/files'
-				if (!fs.existsSync(dirFile)){
-        	fs.mkdirSync(dirFile);
-        }
-				var dirImage = dir + '/images'
-        if (!fs.existsSync(dirImage)){
-        	fs.mkdirSync(dirImage);
-        }
-				//MOVE FILE TO DESTINATION
-
-				//image case
-				if (req.body.image != null || req.body.image != undefined){
-        	fs.rename(req.file.path,dirImage + '/' + req.file.filename,function(err){
-		gm(dirImage + '/' + req.file.filename).autoOrient().write(dirImage + '/' + req.file.filename,function(err){console.log(err);});
-            var pic = {picid:req.body.image, path:'/web/uploads/'+group._id + '/images/' + req.file.filename, timeStamp:new Date()};
-						User.findOne({token:req.token},function(err,user){
-							if (err){
-								//cleanup
-								fs.exists(dirImage + '/' + req.file.filename, function(exists) {
-  								if(exists) {
-    								fs.unlink(dirImage + '/' + req.file.filename);
-									}
-								});
-								res.send(403);
-							}
-							else{
-								addPic(user,group,pic,res);
-							}
-						});
-          })
-        }
-
-				//file case
-				else{
-					fs.rename(req.file.path,dirFile + '/' + req.file.filename,function(err){
-						console.log(" file moved ");
-						////check if its a file or a image an proceed accordly.
-						if (err){
-							//cleanup
-							fs.exists(dirImage + '/' + req.file.filename, function(exists) {
-                if(exists) {
-                	fs.unlink(dirImage + '/' + req.file.filename);
-								}
-            	});
-							fs.exists(req.file.path, function(exists) {
-	              if(exists) {
-	                      fs.unlink(req.file.path);
-	              }
-              });
-							res.send(403)
-						}
-						file = {"filename":req.file.filename,"fileOriginalName":req.file.originalname,"path":dirFile + '/' + req.file.filename,"datetime":Date.now()};
-						if (group.files == null){
-							group.files = [];
-						}
-						group.files.push(file);
-						group.save(function(err,newGroup){
-							if (err){
-								//cleanup
-								fs.exists(dirFile + '/' + req.file.filename, function(exists) {
-                  if(exists) {
-                  	fs.unlink(dirFile + '/' + req.file.filename);
-									}
-                });
-								res.send(404)
-							}
-							else{
-            		io.sockets.in(newGroup._id.toString()).emit('file_created', { file: file });
-								res.send({message:"file uploaded",path:req.file.path});
-							}
-						});
-					});
-
-				}
-			}
-			else{
-				console.log(req.token);
-				res.send(403);
-			}
-		});
-	});
+	.post(
+		checkGroupAuth,
+		multer({dest: '/app/pandicam/uploads/'}).single('file'),
+		pandicamfileManager.upload);
 
 router.route('/user/addUserPic')
-	.post(checkAuth,multer({dest: '/app/pandicam/uploads/'}).single('file'),function(req,res){
-  	User.findOne({token: req.token},function(err,user){
-    	if (err){
-      	res.send(error);
-      }
-      else if (user != null){
-      	// handle upload;
-        console.log("user finded");
-				user.img = '/web' + req.file.path.substring(13);
-				user.save(function(err,savedUser){
-					res.send({pic:savedUser.img});
-				})
-      }
-      else{
-      	console.log(req.token);
-      	res.send(403);
-			}
-    });
-	});
+	.post(
+			checkAuth,
+			multer({dest: '/app/pandicam/uploads/'}).single('file'),
+			pandicamfileManager.addUserPic);
+
+	/**********************************
+	*		END	UPLOAD FUNCTIONS		 			*
+	***********************************/
 
 
+
+
+
+	/**********************************
+	*			USER MANAGEMENT 		  			*
+	***********************************/
 
 router.route('/user/get')
 	.get(checkAuth,function(req,res){
@@ -385,62 +152,33 @@ router.route('/user/get')
 		});
 	});
 
-
-router.route('/user/addDeviceId')
-	.post(checkAuth,function(req,res){
-		console.log(req.body.deviceId);
-		User.findOne({token: req.token},function(err,user){
-			if (err){
-				res.send(err);
-			}
-			else if (user != null){
-				user.deviceId = req.body.deviceId;
-				user.save(function(err){
-					if (err){
-						res.send(err)
-					}
-					else{
-						res.send({message:"device id updated"});
-					}
-				});
-			}
-		});
-	});
-
-router.route("/user/login")
-	.post(function(req,res){
-		var username = req.body.username;
-		var password = req.body.password;
-		session = req.session;
-		
-		console.log(req.body);
-		if (username == null || password == null){
-			if (username == null) res.send({message:"username cannot be null"});
-			if (password == null) res.send({message:"password cannot be null"});
-		}
-		else{
-			User.findOne({username: username},function(err,user){
-				if (err) res.send(err);
-				console.log(user);
-			
-				if (user != null){
-					if (user.password == password){
-						//res.header("Access-Control-Allow-Origin", "*");
-						//res.send(user);
-						//join to user io
-						res.send(user);
-						//res.redirect("http://pandicamproject.com/pandicam.html")
-					}
-					else{
-						res.send(403);
-					}
+	router.route('/user/addDeviceId')
+		.post(checkAuth,function(req,res){
+			console.log(req.body.deviceId);
+			User.findOne({token: req.token},function(err,user){
+				if (err){
+					res.send(err);
 				}
-				else{
-					res.send(403);
+				else if (user != null){
+					user.deviceId = req.body.deviceId;
+					user.save(function(err){
+						if (err){
+							res.send(err)
+						}
+						else{
+							res.send({message:"device id updated"});
+						}
+					});
 				}
 			});
-		}
-	});
+		});
+
+
+	/**********************************
+	*		END	USER MANAGEMENT 		  		*
+	***********************************/
+
+
 
 
 router.route("/user/groupPics")
@@ -580,7 +318,7 @@ router.route("/group/getPics")
 
 			/*group.images.forEach(function(i){
 				var path=i.path.replace('/web','/app/pandicam');
-				var picid = i.picid;	
+				var picid = i.picid;
  	                       	fs.createReadStream(path).pipe(fs.createWriteStream(dir + '/' + picid + '.jpeg'))
         		})*/
 
@@ -726,8 +464,8 @@ router.route("/group/removeSelf")
 								console.log(groupId);
 								res.send({message:"updated", results:user});
 							});
-						
-					});				
+
+					});
 			}
 		});
 	});
@@ -1159,7 +897,7 @@ function removePic(group,pic){
         			fs.exists(path, function(exists) {
                 			if(exists) {
                         			fs.unlink(path);
-          	      			}		
+          	      			}
         			});
 			}
 		});
@@ -1196,7 +934,7 @@ function removeIndividualPic(group,pic){
 
 
 
-	
+
 	//group.update({$pull: {images :{picid:pic}}},function(err){
 	//	if (err) console.log(err);
 	//});
