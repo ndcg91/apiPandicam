@@ -11,7 +11,7 @@ httpsOptions = {
   ca: read('ssl/api_pandicamproject_com.ca-bundle.crt', 'utf8')
 };
 var server 		= require('https').createServer(httpsOptions,app);
-var io        = require('./sockets').listen(server);
+var io        = require('./socket.js').listen(server);
 
 
 
