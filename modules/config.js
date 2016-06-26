@@ -11,7 +11,7 @@ var mongoose							= require('mongoose');
 var jwt										= require('jsonwebtoken');
 var morgan								= require('morgan');
 var multer 								= require('multer');
-var pandicamSocket				= require('./modules/socket.js');
+var pandicamSocket				= require('./socket.js');
 
 /* APN CONNECTION */
 var apn                   = require('apn');
@@ -45,4 +45,4 @@ mongoose.connect('mongodb://pandicamProject:TemporaL1718@188.166.68.124:27017/pa
 exports.router          = router;
 exports.server          = server;
 exports.apnConnection   = apnConnection;
-exports.apn             = apn;  
+exports.apn             = apn;
