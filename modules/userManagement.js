@@ -1,6 +1,6 @@
 var exports = module.exports;
 var User 		= require('./database/user.js');
-var Group 		= require('./modules/database/groups.js');
+var Group 		= require('./database/groups.js');
 
 
 
