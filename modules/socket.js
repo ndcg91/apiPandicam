@@ -1,7 +1,7 @@
 var exports = module.exports = {};
 var config	= require('./config.js');
 var server  = config.server;
-var io 			= require("socket.io").listen(server, { origins:'*:*'});
+var io 			= config.io;
 var Group 	= require('./database/groups.js');
 
 
