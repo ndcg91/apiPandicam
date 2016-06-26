@@ -1,59 +1,35 @@
-var express 		= require('express');
-var cors 		= require('cors');
-var app 		= express();
-var server 		= require('http').createServer(app);
-var https		= require('https');
-var port = process.env.PORT || 8082;
-var router = express.Router();
-var io = require("socket.io").listen(server, { origins:'*:*'});
-var bodyParser 		= require('body-parser');
-var mongoose		= require('mongoose');
-var jwt			= require('jsonwebtoken');
-var morgan		= require('morgan');
-var User 		= require('./modules/database/user.js');
-var Group 		= require('./modules/database/groups.js');
-var File 		= require('./modules/database/files.js');
-var Email = require('./modules/email.js');
-var localStorage 	= require('localStorage');
-var archiver 		= require('archiver');
-var async = require('async');
-var request = require('request');
-var fs = require('fs');
-var qr = require('qr-js');
-var gm = require('gm');
-var pandicamApn = require('./modules/apn.js');
-var pandicamSocket = require('./modules/socket.js');
-var pandicamRegister = require('./modules/register.js');
-var pandicamfileManager = require('./modules/fileManager.js');
-var pandicamUserManagement = require('./modules/userManagement.js');
+var express 							= require('express');
+var cors 									= require('cors');
+var app 									= express();
+var server 								= require('http').createServer(app);
+var https									= require('https');
+var port 									= process.env.PORT || 8082;
+var router 								= express.Router();
+var io 										= require("socket.io").listen(server, { origins:'*:*'});
+var bodyParser 						= require('body-parser');
+var mongoose							= require('mongoose');
+var jwt										= require('jsonwebtoken');
+var morgan								= require('morgan');
+var User 									= require('./modules/database/user.js');
+var Group 								= require('./modules/database/groups.js');
+var Email 								= require('./modules/email.js');
+var localStorage 					= require('localStorage');
+var archiver 							= require('archiver');
+var request 							= require('request');
+var fs 										= require('fs');
+var qr 										= require('qr-js');
+var gm 										= require('gm');
+var pandicamApn 					= require('./modules/apn.js');
+var pandicamSocket				= require('./modules/socket.js');
+var pandicamRegister 			= require('./modules/register.js');
+var pandicamfileManager 	= require('./modules/fileManager.js');
+var pandicamUserManagement= require('./modules/userManagement.js');
+var pandicamGroupUM 			= require('./modules/groupUserManagement.js');
+var multer 								= require('multer');
 
-
-
-var multer = require('multer');
-
-var storage = multer.diskStorage({ //multers disk storage settings
-	destination: function (req, file, cb) {
-		cb(null, '/app/pandicam/uploads/')
-	},
-	filename: function (req, file, cb) {
-		var datetimestamp = Date.now();
-		cb(null,file.originalname);
-		console.log(req.body);
-		console.log(file);
-	}
-});
-
-var upload = multer({ //multer settings
-	storage: storage
-}).single('file');
 
 io.on("connection", pandicamSocket.handleClient);
-router.route('/backup')
-	.post(function(req,res){
-	Email.push(req,res);
-	console.log(req.body.commits[0]);
-	//res.send(200);
-})
+
 /////////ONE SOCKET FOR EACH GROUP
 Group.find({},function(err,groups){
 	groups.forEach(function(group){
@@ -74,7 +50,6 @@ app.use(bodyParser.json());
 app.use(morgan("dev"));
 app.use(function(req, res, next) {
 	res.setHeader('Access-Control-Allow-Origin', '*');
-	//res.setHeader('Access-Control-Allow-Credentials','true');
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization, Access-Control-Allow-Origin, Access-Control-Allow-Headers,X-Requested-With, Content-Type, Accept');
 	res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
@@ -113,6 +88,7 @@ router.route("/user/login")	.post(pandicamRegister.login);
 /**********************************
 *			EMAIL FUNCTIONS   					*
 ***********************************/
+router.route('/backup').post(Email.push)
 router.route('/contact').post(Email.contactForm);
 router.route('/email/new').post(Email.send);
 router.route('/email/contactUs').post(Email.contactUs);
@@ -146,11 +122,11 @@ router.route('/user/addUserPic')
 	/**********************************
 	*			USER MANAGEMENT 		  			*
 	***********************************/
-
 router.route('/user/get').get(checkAuth,pandicamUserManagement.getUser);
 router.route('/user/addDeviceId').post(checkAuth,pandicamUserManagement.addDeviceId);
 router.route("/group/addSelf").post(checkAuth,pandicamUserManagement.addGroup);
 router.route("/group/removeSelf").post(checkAuth,pandicamUserManagement.removeGroup);
+router.route("/user/groupPics").get(checkAuth,pandicamUserManagement.getPics);
 
 	/**********************************
 	*		END	USER MANAGEMENT 		  		*
@@ -160,202 +136,17 @@ router.route("/group/removeSelf").post(checkAuth,pandicamUserManagement.removeGr
 /*=============================================>>>>>
 = Group user MANAGEMENT =
 ===============================================>>>>>*/
-
-
-router.route("/group/removeUser")
-	.post(checkGroupAuth,function(req,res){
-		var userToken = req.token;
-		var groupToken = req.groupToken;
-		var userToRemove = req.body.user;
-		User.findOne({token:userToken},function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				res.send(403);
-			}
-		});
-		Group.findOne({token:groupToken},function(err,group){
-			if (err) res.send(err);
-			if (group != null){
-				User.findOne({username:userToRemove},function(err,user){
-					if (err) res.send(err);
-					if (user != null){
-						group.update({$pull: {users: { deviceId:user.deviceId, username:user.username, as:"client"}}},function(err){
-							if (err) res.send(err);
-							user.update({$pull: {belongsTo:{as:"client",to:group._id}}},function(err){
-								if (err) res.send(err);
-								res.send({message:"updated", results:user});
-							});
-						});
-					}
-				});
-			}
-			else{
-				res.send(403);
-			}
-		});
-	});
-
-
-router.route("/group/getUsers")
-	.get(checkGroupAuth,function(req,res){
-		var userToken = req.token;
-		var groupToken = req.groupToken;
-
-		User.findOne({token:userToken},function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				res.send(403);
-			}
-		});
-		Group.findOne({token:groupToken},function(err,group){
-			if (err) res.send(err);
-			if (group != null){
-				res.send(group.users);
-			}
-			else{
-				res.send(403);
-			}
-		});
-	});
-
-
-router.route('/group/blacklist')
-	.post(checkGroupAuth,function(req,res){
-		var userToken = req.token;
-		var groupToken = req.groupToken;
-		var userToBlackList = req.body.user;
-		User.findOne({ token:userToken },function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				res.send(401,{message:"Not authorized, please login"});
-			}
-			else{
-				Group.findOne({token:groupToken},function(err,group){
-					if (err) res.send(err);
-					if (group != null){
-						User.findOne({username:userToBlackList},function(err,baduser){
-							if (err) res.send(err);
-							if (user != null){
-								group.blacklist.push({blacklist:baduser._id,username:baduser.username});
-								group.save(function(err){
-									if (err) res.send(err);
-									res.send({message:"user has been blacklisted "});
-								});
-							}
-							else{
-								res.send(401,{message:"user you are trying blackist do not exist"});
-							}
-						});
-					}
-					else{
-						res.send(401,"Group do not exist or is not your group");
-					}
-				});
-			}
-
-		});
-	});
-
-router.route('/group/getblacklist')
-	.get(checkGroupAuth,function(req,res){
-		var userToken = req.token;
-		var groupToken = req.groupToken;
-		User.findOne({ token:userToken },function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				res.send(401,{message:"Not authorized, please login"});
-			}
-			else{
-				Group.findOne({token:groupToken},function(err,group){
-					if (err) res.send(err);
-					if (group != null){
-						var users = [];
-						if (group.blacklist.length == 0) res.send({});
-						group.blacklist.forEach(function(element){
-							User.findOne({_id: mongoose.Types.ObjectId(element.blacklist) },function(err,user){
-								if (err) res.send(err);
-								users.push(user);
-								if (users.length == group.blacklist.length){
-									res.send(users);
-								}
-							});
-						});
-					}
-					else{
-						res.send(401,"Group do not exist or is not your group");
-					}
-				});
-			}
-
-		});
-	});
-
-
-router.route("/group/whiteList")
-	.post(checkGroupAuth,function(req,res){
-		var userToken = req.token;
-		var groupToken = req.groupToken;
-		var userToWhiteList = req.body.user;
-		User.findOne({token:userToken},function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				res.send(401,{message:"please authenticate"});
-			}
-			else{
-				Group.findOne({token:groupToken},function(err,group){
-					if (err) res.send(err);
-					if (group != null){
-						User.findOne({username:userToWhiteList},function(err,user){
-							if (err) res.send(err);
-							if (user != null){
-								var temp = [];
-								group.blacklist.forEach(function(buser){
-									if (buser.username != req.body.user){
-										temp.push(buser);
-									}
-								})
-								group.blacklist = temp;
-								group.save(function(err){
-									if (err) res.send(err);
-									res.send({message:"user has been whitelisted "});
-
-								})
-							}
-							else{
-								res.send(401,{message:"User was not in the black list"});
-							}
-						});
-					}
-					else{
-						res.send(401,{message:"group not found"});
-					}
-				});
-			}
-		});
-	});
-
-
-
-
-
+router.route("/group/removeUser").post(checkGroupAuth,pandicamGroupUM.removeUser);
+router.route("/group/getUsers").get(checkGroupAuth,pandicamGroupUM.getUsers);
+router.route('/group/blacklist').post(checkGroupAuth,pandicamGroupUM.blacklist);
+router.route('/group/getblacklist').get(checkGroupAuth,pandicamGroupUM.getblacklist);
+router.route("/group/whiteList").post(checkGroupAuth,pandicamGroupUM.whiteList);
 /*= End of Group user MANAGEMENT =*/
 /*=============================================<<<<<*/
 
-router.route("/user/groupPics")
-	.get(checkAuth,function(req,res){
-		User.findOne({token:req.token},function(err,user){
-			if (err) res.send(err);
-			var userGroups = user.belongsTo;
-			var Ids=userGroups.map(function(a){return a.to});
-			Group.find({_id: {$in:Ids}},function(err,groups){
-				if (err) res.send(err);
-				var imagesPerGroup = groups.map(function(a){
-					return {groupName:a.groupName, images:a.images};
-				});
-				res.send(imagesPerGroup);
-			});
-		});
-	});
+
+
+
 
 
 router.route("/group/create")
@@ -544,7 +335,6 @@ router.route("/group/addFile")
 					if (err) res.send(err);
 					if (group != null){
 						var file = {fileId:fileToAdd, path:path,timeStamp:new Date(),name:req.body.fileName};
-						var fs = require('fs');
 						var dir = './uploads/'+group._id;
 						if (!fs.existsSync(dir)){
 							fs.mkdirSync(dir);
@@ -726,7 +516,14 @@ function checkAuth(req,res,next){
 	if (typeof tokenFromHeader !== 'undefined'){
 		var token = tokenFromHeader.split(" ")[1];
 		req.token = token;
-		next()
+
+		//we are making sure here that the user exists and return the user on req.user
+		User.findOne({token:token},function(err, user){
+	    if (err) { res.send(err); return };
+	    if (user == null) { res.send(403); return }
+			else { req.user = user; next() }
+	  });
+
 	}
 	else{
 		res.send(403)
@@ -742,7 +539,24 @@ function checkGroupAuth(req,res,next){
 		var grouptoken = tokenFromHeader.split(" ")[2];
 		req.token = token;
 		req.groupToken = grouptoken;
-		next()
+
+		User.findOne({token:token},function(err, user){
+	    if (err) { res.send(err); return };
+	    if (user == null) { res.send(403); return }
+			else {
+				req.user = user;
+				Group.findOne({token:groupToken},function(err,group){
+					if (err) { res.send(err); return };
+					if (group != null){
+						req.group = group;
+						next();
+					}
+					else{
+						res.send(403);
+					}
+				});
+			}
+	  });
 	}
 	else{
 		res.send(403)
