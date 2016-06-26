@@ -1,5 +1,5 @@
 var exports = module.exports = {};
-var Group 		= require('./modules/database/groups.js');
+var Group 	= require('./database/groups.js');
 
 
 exports.handleClient = function (socket) {
@@ -69,10 +69,3 @@ Group.find({},function(err,groups){
 
 
 //init
-io.on("connection", pandicamSocket.handleClient);
-router.route('/backup')
-	.post(function(req,res){
-	Email.push(req,res);
-	console.log(req.body.commits[0]);
-	//res.send(200);
-})

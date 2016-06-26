@@ -18,7 +18,7 @@ var request = require('request');
 var fs = require('fs');
 var qr = require('qr-js');
 var gm = require('gm');
-var io 			= require("socket.io").listen(server, { origins:'*:*'});
+var io = require("socket.io").listen(server, { origins:'*:*'});
 var pandicamApn = require('./modules/apn.js');
 var pandicamSocket = require('./modules/socket.js');
 var pandicamRegister = require('./modules/register.js');
@@ -45,7 +45,13 @@ var upload = multer({ //multer settings
 	storage: storage
 }).single('file');
 
-
+io.on("connection", pandicamSocket.handleClient);
+router.route('/backup')
+	.post(function(req,res){
+	Email.push(req,res);
+	console.log(req.body.commits[0]);
+	//res.send(200);
+})
 
 /*++++++++++++++++++++++++++++++++++++++++++++
 ****Comment Section Seting the api parameters+
