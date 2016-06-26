@@ -13,6 +13,7 @@ var pandicamGM 						= require('./modules/groupManagement.js');
 var router								= config.router;
 var multer								= config.multer;
 var app										= config.app;
+var server								= config.server;
 
 /*++++++++++++++++++++++++++++++++++++++++++++
 ****Comment Section Seting the api parameters+
