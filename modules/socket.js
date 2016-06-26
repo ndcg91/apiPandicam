@@ -5,7 +5,6 @@ var io 			= require("socket.io").listen(server, { origins:'*:*'});
 var Group 	= require('./database/groups.js');
 
 
-io.on("connection", handleClient(socket));
 
 /////////ONE SOCKET FOR EACH GROUP
 Group.find({},function(err,groups){
@@ -79,6 +78,7 @@ exports.newGroup = function(userID,group){
 	io.sockets.in(userID).emit('new_group', group);
 }
 
+io.on("connection", handleClient);
 
 
 //init
