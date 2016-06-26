@@ -1,5 +1,5 @@
 var exports = module.exports = {};
-
+var Group 		= require('./modules/database/groups.js');
 
 
 exports.handleClient = function (socket) {
