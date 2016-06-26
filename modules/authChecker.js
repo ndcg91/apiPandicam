@@ -39,7 +39,7 @@ exports.checkGroupAuth = function(req,res,next){
 	    if (user == null) { res.sendStatus(403); return }
 			else {
 				req.user = user;
-				Group.findOne({token:groupToken},function(err,group){
+				Group.findOne({token:grouptoken},function(err,group){
 					if (err) { res.send(err); return };
 					if (group != null){
 						req.group = group;
