@@ -48,3 +48,4 @@ exports.apnConnection   = apnConnection;
 exports.apn             = apn;
 exports.multer          = multer;
 exports.app             = app;
+config.port             = port;
