@@ -3,7 +3,7 @@ var qr 						 = require('qr-js');
 var fs 						 = require('fs');
 var User 		       = require('./database/user.js');
 var Group 	       = require('./database/groups.js');
-var FileManager    = require('./FileManager.js');
+var FileManager    = require('./fileManager.js');
 var SocketManager  = require('./socket.js');
 var apnManager     = require('./apn.js');
 
