@@ -14,13 +14,13 @@ exports.checkAuth = function(req,res,next){
 		//we are making sure here that the user exists and return the user on req.user
 		User.findOne({token:token},function(err, user){
 	    if (err) { res.send(err); return };
-	    if (user == null) { res.send(403); return }
+	    if (user == null) { res.sendStatus(403); return }
 			else { req.user = user; next() }
 	  });
 
 	}
 	else{
-		res.send(403)
+		res.sendStatus(403)
 	}
 }
 
@@ -36,7 +36,7 @@ exports.checkGroupAuth = function(req,res,next){
 
 		User.findOne({token:token},function(err, user){
 	    if (err) { res.send(err); return };
-	    if (user == null) { res.send(403); return }
+	    if (user == null) { res.sendStatus(403); return }
 			else {
 				req.user = user;
 				Group.findOne({token:groupToken},function(err,group){
@@ -46,13 +46,13 @@ exports.checkGroupAuth = function(req,res,next){
 						next();
 					}
 					else{
-						res.send(403);
+						res.sendStatus(403);
 					}
 				});
 			}
 	  });
 	}
 	else{
-		res.send(403)
+		res.sendStatus(403)
 	}
 }
