@@ -78,7 +78,7 @@ exports.newGroup = function(userID,group){
 	io.sockets.in(userID).emit('new_group', group);
 }
 
-io.on("connection", SocketManager.handleClient);
+io.on("connection", handleClient);
 
 
 //init
