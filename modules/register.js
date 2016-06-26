@@ -1,4 +1,5 @@
 var exports = module.exports;
+var User 		= require('./database/user.js');
 
 
 exports.register = function(req,res){
@@ -48,4 +49,34 @@ exports.register = function(req,res){
 				}
 			});
 		}
+}
+
+exports.login = function(req,res){
+	var username = req.body.username;
+	var password = req.body.password;
+	session = req.session;
+
+	if (username == null || password == null){
+		if (username == null) res.send({message:"username cannot be null"});
+		if (password == null) res.send({message:"password cannot be null"});
+	}
+	else{
+		User.findOne({username: username},function(err,user){
+		 if (err) res.send(err);
+		 if (user != null){
+			 if (user.password == password){
+				 //res.header("Access-Control-Allow-Origin", "*");
+				 //res.send(user);
+				 //join to user io
+				 res.send(user);
+			 }
+			 else{
+							 res.send(403);
+			 }
+		 }
+		 else{
+			 res.send(403);
+		 }
+		});
+	}
 }
