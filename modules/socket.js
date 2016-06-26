@@ -20,7 +20,7 @@ Group.find({},function(err,groups){
 
 
 
-var handleClient = function(socket) {
+exports.handleClient = function(socket) {
 	// we've got a client connection
 	console.log("client connected");
 	socket.emit("connected_now", { connected: 'connect' });
@@ -78,7 +78,6 @@ exports.newGroup = function(userID,group){
 	io.sockets.in(userID).emit('new_group', group);
 }
 
-io.on("connection", handleClient);
 
 
 //init

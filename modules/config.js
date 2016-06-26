@@ -1,8 +1,9 @@
-var exports      = module.exports;
+var exports               = module.exports;
 var express 							= require('express');
 var cors 									= require('cors');
 var app 									= express();
 var https									= require('https');
+var SocketManager         = require('./socket.js');
 
 read = require('fs').readFileSync,
 httpsOptions = {
@@ -11,7 +12,7 @@ httpsOptions = {
   ca: read('ssl/api_pandicamproject_com.ca-bundle.crt', 'utf8')
 };
 var server 		= require('https').createServer(httpsOptions,app);
-var io 			= require("socket.io").listen(server, { origins:'*:*'});
+var io 			  = require("socket.io").listen(server, { origins:'*:*'});
 
 
 
@@ -50,6 +51,7 @@ app.use(function(req, res, next) {
 });
 
 mongoose.connect('mongodb://pandicamProject:TemporaL1718@188.166.68.124:27017/pandicam');
+io.on("connection", SocketManager.handleClient);
 
 
 
