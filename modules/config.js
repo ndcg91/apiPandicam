@@ -11,11 +11,13 @@ httpsOptions = {
   ca: read('ssl/api_pandicamproject_com.ca-bundle.crt', 'utf8')
 };
 var server 		= require('https').createServer(httpsOptions,app);
+var io 			  = require("socket.io").listen(server, { origins:'*:*'});
 
 
 
 
-var port 									= process.env.PORT || 8444;
+
+var port 									= process.env.PORT || 8443;
 var router 								= express.Router();
 var bodyParser 						= require('body-parser');
 var mongoose							= require('mongoose');
