@@ -1,8 +1,8 @@
-var export = module.exports;
+var exports = module.exports = {};
 
 
 
-export.handleClient = function (socket) {
+exports.handleClient = function (socket) {
 	// we've got a client connection
 	console.log("client connected");
 	socket.emit("connected_now", { connected: 'connect' });
