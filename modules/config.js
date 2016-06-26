@@ -3,7 +3,6 @@ var express 							= require('express');
 var cors 									= require('cors');
 var app 									= express();
 var https									= require('https');
-var SocketManager         = require('./socket.js');
 
 read = require('fs').readFileSync,
 httpsOptions = {
@@ -63,4 +62,5 @@ exports.app             = app;
 exports.port            = port;
 exports.io              = io;
 
+var SocketManager       = require('./socket.js');
 io.on("connection", SocketManager.handleClient);
