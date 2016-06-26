@@ -11,7 +11,7 @@ var pandicamGroupUM 			= require('./modules/groupUserManagement.js');
 var pandicamAuth					= require('./modules/authChecker.js');
 var pandicamGM 						= require('./modules/groupManagement.js');
 var router								= config.router;
-
+var multer								= exports.multer;
 
 
 /*++++++++++++++++++++++++++++++++++++++++++++
