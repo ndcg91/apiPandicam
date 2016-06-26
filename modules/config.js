@@ -16,8 +16,8 @@ var pandicamSocket				= require('./socket.js');
 /* APN CONNECTION */
 var apn                   = require('apn');
 var read                  = require('fs').readFileSync
-var pfx                   = read('./../_certs/pandicamPush.p12');
-var pfxp                  = read('./../_certs/pandicamPushProd.p12');
+var pfx                   = read('/app/pandicamDev/_certs/pandicamPush.p12');
+var pfxp                  = read('/app/pandicamDev/_certs/pandicamPushProd.p12');
 var options               = { pfx: pfx, production:false };
 var apnConnection         = new apn.Connection(options,manageApn);
 function manageApn(err){
