@@ -54,17 +54,7 @@ exports.handleClient = function (socket) {
 };
 
 
-/////////ONE SOCKET FOR EACH GROUP
-Group.find({},function(err,groups){
-	groups.forEach(function(group){
-		var s = io.of('/'+ group._id);
-		s.emit('init','ok');
-		s.on('message',function(data){
-			s.emit('message',data);
-		});
 
-	})
-})
 
 
 

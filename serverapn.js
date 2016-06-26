@@ -3,7 +3,7 @@ var cors 		= require('cors');
 var app 		= express();
 var server 		= require('http').createServer(app);
 var https		= require('https');
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 8082;
 var router = express.Router();
 var io = require("socket.io").listen(server, { origins:'*:*'});
 var bodyParser 		= require('body-parser');
@@ -54,7 +54,17 @@ router.route('/backup')
 	console.log(req.body.commits[0]);
 	//res.send(200);
 })
+/////////ONE SOCKET FOR EACH GROUP
+Group.find({},function(err,groups){
+	groups.forEach(function(group){
+		var s = io.of('/'+ group._id);
+		s.emit('init','ok');
+		s.on('message',function(data){
+			s.emit('message',data);
+		});
 
+	})
+})
 /*++++++++++++++++++++++++++++++++++++++++++++
 ****Comment Section Seting the api parameters+
 **********************************************/
