@@ -2,9 +2,18 @@ var exports      = module.exports;
 var express 							= require('express');
 var cors 									= require('cors');
 var app 									= express();
-var server 								= require('http').createServer(app);
 var https									= require('https');
-var port 									= process.env.PORT || 8082;
+
+read = require('fs').readFileSync,
+httpsOptions = {
+	key: read('ssl/api_pandicamproject_com.key', 'utf8'),
+  cert: read('ssl/api_pandicamproject_com.crt', 'utf8'),
+  ca: read('ssl/api_pandicamproject_com.ca-bundle.crt', 'utf8')
+};
+var server 		= require('https').createServer(httpsOptions,app);
+
+
+var port 									= process.env.PORT || 8443;
 var router 								= express.Router();
 var bodyParser 						= require('body-parser');
 var mongoose							= require('mongoose');
@@ -15,7 +24,6 @@ var pandicamSocket				= require('./socket.js');
 
 /* APN CONNECTION */
 var apn                   = require('apn');
-var read                  = require('fs').readFileSync
 var pfx                   = read('/app/pandicamDev/_certs/pandicamPush.p12');
 var pfxp                  = read('/app/pandicamDev/_certs/pandicamPushProd.p12');
 var options               = { pfx: pfx, production:false };
