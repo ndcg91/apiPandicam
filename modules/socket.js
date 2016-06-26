@@ -2,6 +2,7 @@ var exports = module.exports = {};
 var config	= require('./config.js');
 var server  = config.server;
 var Group 	= require('./database/groups.js');
+var User 		= require('./database/user.js');
 
 
 var socketio = require('socket.io')
