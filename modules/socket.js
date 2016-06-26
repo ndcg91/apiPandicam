@@ -5,7 +5,7 @@ var io 			= require("socket.io").listen(server, { origins:'*:*'});
 var Group 	= require('./database/groups.js');
 
 
-io.on("connection", handleClient);
+io.on("connection", handleClient(socket));
 
 /////////ONE SOCKET FOR EACH GROUP
 Group.find({},function(err,groups){
@@ -21,7 +21,7 @@ Group.find({},function(err,groups){
 
 
 
-var handleClient = function (socket) {
+var handleClient = function(socket) {
 	// we've got a client connection
 	console.log("client connected");
 	socket.emit("connected_now", { connected: 'connect' });
