@@ -12,7 +12,7 @@ var pandicamAuth					= require('./modules/authChecker.js');
 var pandicamGM 						= require('./modules/groupManagement.js');
 var router								= config.router;
 var multer								= config.multer;
-
+var app										= config.app;
 
 /*++++++++++++++++++++++++++++++++++++++++++++
 ****Comment Section Seting the api parameters+
