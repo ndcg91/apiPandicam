@@ -25,7 +25,7 @@ var pandicamApn = require('./modules/apn.js');
 var pandicamSocket = require('./modules/socket.js');
 var pandicamRegister = require('./modules/register.js');
 var pandicamfileManager = require('./modules/fileManager.js');
-
+var pandicamUserManagement = require('./modules/userManagement.js');
 
 
 
@@ -143,420 +143,23 @@ router.route('/user/addUserPic')
 
 
 
-
-
 	/**********************************
 	*			USER MANAGEMENT 		  			*
 	***********************************/
 
-router.route('/user/get')
-	.get(checkAuth,function(req,res){
-		User.findOne({token: req.token},function(err,user){
-			if (err){
-				res.send(error);
-			}
-			else if (user != null){
-				res.send(user);
-			}
-			else{
-				console.log(req.token);
-				res.send(403);
-			}
-		});
-	});
-
-	router.route('/user/addDeviceId')
-		.post(checkAuth,function(req,res){
-			console.log(req.body.deviceId);
-			User.findOne({token: req.token},function(err,user){
-				if (err){
-					res.send(err);
-				}
-				else if (user != null){
-					user.deviceId = req.body.deviceId;
-					user.save(function(err){
-						if (err){
-							res.send(err)
-						}
-						else{
-							res.send({message:"device id updated"});
-						}
-					});
-				}
-			});
-		});
-
+router.route('/user/get').get(checkAuth,pandicamUserManagement.getUser);
+router.route('/user/addDeviceId').post(checkAuth,pandicamUserManagement.addDeviceId);
+router.route("/group/addSelf").post(checkAuth,pandicamUserManagement.addGroup);
+router.route("/group/removeSelf").post(checkAuth,pandicamUserManagement.removeGroup);
 
 	/**********************************
 	*		END	USER MANAGEMENT 		  		*
 	***********************************/
 
 
-
-
-router.route("/user/groupPics")
-	.get(checkAuth,function(req,res){
-		User.findOne({token:req.token},function(err,user){
-			if (err) res.send(err);
-			var userGroups = user.belongsTo;
-			var Ids=userGroups.map(function(a){return a.to});
-			Group.find({_id: {$in:Ids}},function(err,groups){
-				if (err) res.send(err);
-				var imagesPerGroup = groups.map(function(a){
-					return {groupName:a.groupName, images:a.images};
-				});
-				res.send(imagesPerGroup);
-			});
-		});
-	});
-
-
-router.route("/group/create")
-	.post(checkAuth,function(req,res){
-		if (req.body.groupName == null || req.body.password == null ||req.body.active == null ||req.body.pending == null ){
-			if (req.body.groupName == null) res.send({message:"group name cannot be null"});
-			if (req.body.password == null) res.send({message:"password cannot be null"});
-			if (req.body.active == null) res.send({message:"active cannot be null"});
-			if (req.body.pending == null) res.send({message:"pending cannot be null"});
-		}
-		else{
-			var newGroup = new Group();
-			newGroup.groupName = req.body.groupName;
-			newGroup.groupDescription = req.body.groupDescription;
-			newGroup.password = req.body.password;
-			newGroup.active = req.body.active;
-			newGroup.pending = req.body.pending;
-			newGroup.date = new Date();
-			User.findOne({token:req.token},function(err,user){
-				if (err)
-					res.send(err);
-				if (user != null){
-					newGroup.save(function(err,group){
-						if (err)
-							res.send(err);
-						group.token = jwt.sign(group,'secretkey',{noTimestamp:true});
-						group.update({$addToSet :{users: { deviceId:user.deviceId, username:user.username, as:"server"} }}, function(err,groupWithUsers){
-							if (err) res.send(err);
-							console.log(groupWithUsers);
-							group.save(function(err,savedGroup){
-								if (err) res.send(err);
-								user.update({$addToSet: {belongsTo: {as:"server", to:savedGroup._id} }},function(err){
-									if (err) res.send(err);
-									qr.saveSync({
-										//value:JSON.stringify('pandicam://'+group._id),
-										value:'pandicam://'+group._id,
-										size:10,
-										path:'/var/www/html/web/qr/'+group._id+'.png'
-									});
-									io.sockets.in(user._id.toString()).emit('new_group', savedGroup);
-									res.send({message:"Group Created",token:group.token,group:group});
-								});
-							});
-						});
-					});
-				}
-			});
-		}
-	});
-
-
-
-router.route("/group/delete")
-	.get(checkGroupAuth,function(req,res){
-		var userToken = req.token;
-		var groupToken = req.groupToken;
-		console.log(req.groupToken);
-		User.findOne({token:userToken},function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				res.send(403);
-			}
-
-			Group.findOneAndRemove({token:groupToken},function(err,group){
-				if (err) res.send(err);
-				user.update({$pull: {belongsTo:{as:"server",to:group._id}}},function(err){
-                    if (err) res.send(err);
-               });
-
-				//cleaning
-				var path = '/app/pandicam/uploads/' + group._id;
-				deleteFolderRecursive(path);
-				User.find(function(err,users){
-					users.forEach(function(element){
-						var temBelongs = [];
-						var belongs = element.belongsTo;
-						belongs.forEach(function(b){
-							if (b.to != group._id){
-								temBelongs.push(b);
-							}
-							else{
-								//is equal should be removed
-								io.sockets.in(element._id.toString()).emit('picgroup_deleted', {groupID:b.to});
-							}
-						});
-						if (temBelongs != belongs){
-							element.belongsTo = temBelongs;
-							element.save(function(err){
-								if (err) { console.log(err)}
-							})
-						}
-					});
-				})
-				io.sockets.in(user._id.toString()).emit('group_deleted', {groupID:group._id});
-				res.send({message:"removed"});
-			});
-		});
-	});
-
-
-
-
-router.route("/group/getPics")
-	.get(checkGroupAuth,function(req,res){
-		var userToken = req.token;
-		var groupToken = req.groupToken;
-		User.findOne({token:userToken},function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				res.send(403);
-			}
-		});
-		Group.findOne({token:groupToken},function(err, group){
-			if (err) res.send(err);
-			var working_directory = '/app/pandicam/uploads/'+group._id.toString()+'/images';
-			var dir = working_directory + '/tmp_copy'
-                        if (!fs.existsSync(dir)){
-                        	fs.mkdirSync(dir);
-                        }
-
-			/*group.images.forEach(function(i){
-				var path=i.path.replace('/web','/app/pandicam');
-				var picid = i.picid;
- 	                       	fs.createReadStream(path).pipe(fs.createWriteStream(dir + '/' + picid + '.jpeg'))
-        		})*/
-
-			zipImg(group.images,res);
-		});
-	});
-
-router.route("/group/editActive")
-	.get(checkGroupAuth,function(req,res){
-		var userToken = req.token;
-		var groupToken = req.groupToken;
-		User.findOne({token:userToken},function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				res.send(403);
-			}
-		});
-		Group.findOne({token:groupToken},function(err,group){
-			if (err) res.send(err);
-			group.active = !group.active;
-			group.pending = !group.pending;
-			group.save(function(err){
-				if (err){
-					res.send(err)
-				}
-				else{
-					res.send({message:"group active toggled"});
-				}
-			});
-		});
-	});
-
-router.route("/group/get")
-	.get(checkAuth,function(req,res){
-		var token = req.token;
-		User.findOne({token:token},function(err,user){
-			if(err) res.send(err);
-			if (user != null){
-				var userGroups = user.belongsTo;///FixMe: modify later
-				var Ids=userGroups.map(function(a){return a.to});
-				console.log(Ids);
-				Group.find({_id: {$in:Ids}},function(err,groups){
-					if (err) res.send(err);
-					res.send(groups);
-				});
-
-			}
-			else { res.send(403) }
-		});
-	});
-
-
-router.route("/group/addSelf")
-	.post(checkAuth,function(req,res){
-		var userToken = req.token;
-		var groupId = req.body.id;
-
-		User.findOne({token:userToken},function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				console.log("user not finded");
-				res.send(403);
-			}
-			else{
-				var continueExec = true;
-				user.belongsTo.forEach(function(element){
-					if (element.to == groupId){
-						continueExec = false;
-						if (element.as == "server"){
-							res.send({message:"pandicam can not also be pic of the same group"});
-						}
-						else{
-							res.send({message:"already in"});
-						}
-					}
-				});
-				if (continueExec){
-					Group.findOne({_id:groupId},function(err,group){
-						if (err) {
-							res.send(err);
-							return;
-						}
-						console.log(groupId);
-						if (group != null){
-							if (group.blacklist.indexOf(user.id) === -1){
-								group.update({$addToSet: {users: { deviceId:user.deviceId, username:user.username, as:"client"}}},function(err){
-									if (err) res.send(err);
-									user.update({$addToSet: {belongsTo:{as:"client",to:group._id}}},function(err){
-										if (err) res.send(err);
-										res.send({message:"updated", results:group});
-									});
-								});
-							}
-							else{
-								console.log("user blacklisted");
-								console.log(group.blacklist.indexOf(user.id));
-								res.send(401,{message:"user backlisted"});
-							}
-						}
-						else{
-							console.log("group not found");
-							res.send({message:"group not found"});
-						}
-					});
-				}
-			}
-		});
-	});
-
-
-
-
-router.route("/group/removeSelf")
-	.post(checkAuth,function(req,res){
-		var userToken = req.token;
-		var groupId = req.body.id;
-		console.log("remove self");
-		console.log("group id", groupId);
-		User.findOne({token:userToken},function(err, user){
-			if (err) res.send(err);
-			if (user == null){
-				console.log("user not finded");
-				res.send(403);
-			}
-			else{
-				Group.update(
-					{_id:groupId},
-					{$pull: {users: { deviceId:user.deviceId}}},
-					{safe:true},
-					function(err,group){
-						if (err) {
-							res.send(err);
-							return;
-						}
-						User.update(
-							{token:userToken},
-							{$pull: {belongsTo: {to:mongoose.Types.ObjectId(groupId)}}},
-							function(err){
-								if (err){
-									res.send(err);
-									return;
-								}
-								console.log(groupId);
-								res.send({message:"updated", results:user});
-							});
-
-					});
-			}
-		});
-	});
-
-
-router.route("/group/addUser")
-	.post(checkGroupAuth,function(req,res){
-		if (req.body.user == null) res.send({message:"user name cannot be null"});
-
-		else{
-
-			var userToken = req.token;
-			var groupToken = req.groupToken;
-			var userToAdd = req.body.user;
-			User.findOne({token:userToken},function(err, user){
-				if (err) res.send(err);
-				if (user == null){
-					console.log("user not finded");
-					res.send(403);
-				}
-			});
-			Group.findOne({token:groupToken},function(err,group){
-				if (err) res.send(err);
-				if (group != null){
-					User.findOne({username:userToAdd},function(err,user){
-						if (err) res.send(err);
-						if (user != null){
-							if (group.blacklist.indexOf(user.id) === -1){
-								group.update({$addToSet: {users: { deviceId:user.deviceId, username:user.username, as:"client"}}},function(err){
-									if (err) res.send(err);
-									user.update({$addToSet: {belongsTo:{as:"client",to:group._id}}},function(err){
-										if (err) res.send(err);
-										res.send({message:"updated", results:user});
-									});
-								});
-							}
-							else{
-								console.log("user blacklisted");
-								console.log(group.blacklist.indexOf(user.id));
-								res.send(401,{message:"user backlisted"});
-							}
-						}
-						else{
-							res.send(401,{message:"user not found"});
-						}
-					});
-				}
-				else{
-					console.log("group not found");
-					res.send(401,{message:"group not found"});
-				}
-			});
-		}
-	});
-router.route("/pic/remove")
-	.post(checkGroupAuth,function(req,res){
-		var userToken = req.token;
-		var groupToken = req.groupToken;
-		var pic = req.body.pic;
-		Group.findOne({token:groupToken},function(err,group){
-			if (err) res.send(err);
-			removeIndividualPic(group,pic);
-			res.send({message:"removed"});
-		});
-	});
-
-router.route("/file/remove")
-        .post(checkGroupAuth,function(req,res){
-                var userToken = req.token;
-                var groupToken = req.groupToken;
-                var file = req.body.file;
-                Group.findOne({token:groupToken},function(err,group){
-                        if (err) res.send(err);
-			removeFile(group,file);
-                        res.send({message:"removed"});
-                });
-        });
-
+/*=============================================>>>>>
+= Group user MANAGEMENT =
+===============================================>>>>>*/
 
 
 router.route("/group/removeUser")
@@ -591,10 +194,7 @@ router.route("/group/removeUser")
 			}
 		});
 	});
-router.route("/test")
-	.get(function(req,res){
-		testNotif('<54032e98 15bba87d cac4142c 350971cb dbab3e56 7f41a2f4 5406c6d0 56a9e356>');
-	});
+
 
 router.route("/group/getUsers")
 	.get(checkGroupAuth,function(req,res){
@@ -737,6 +337,197 @@ router.route("/group/whiteList")
 
 
 
+
+/*= End of Group user MANAGEMENT =*/
+/*=============================================<<<<<*/
+
+router.route("/user/groupPics")
+	.get(checkAuth,function(req,res){
+		User.findOne({token:req.token},function(err,user){
+			if (err) res.send(err);
+			var userGroups = user.belongsTo;
+			var Ids=userGroups.map(function(a){return a.to});
+			Group.find({_id: {$in:Ids}},function(err,groups){
+				if (err) res.send(err);
+				var imagesPerGroup = groups.map(function(a){
+					return {groupName:a.groupName, images:a.images};
+				});
+				res.send(imagesPerGroup);
+			});
+		});
+	});
+
+
+router.route("/group/create")
+	.post(checkAuth,function(req,res){
+		if (req.body.groupName == null || req.body.password == null ||req.body.active == null ||req.body.pending == null ){
+			if (req.body.groupName == null) res.send({message:"group name cannot be null"});
+			if (req.body.password == null) res.send({message:"password cannot be null"});
+			if (req.body.active == null) res.send({message:"active cannot be null"});
+			if (req.body.pending == null) res.send({message:"pending cannot be null"});
+		}
+		else{
+			var newGroup = new Group();
+			newGroup.groupName = req.body.groupName;
+			newGroup.groupDescription = req.body.groupDescription;
+			newGroup.password = req.body.password;
+			newGroup.active = req.body.active;
+			newGroup.pending = req.body.pending;
+			newGroup.date = new Date();
+			User.findOne({token:req.token},function(err,user){
+				if (err)
+					res.send(err);
+				if (user != null){
+					newGroup.save(function(err,group){
+						if (err)
+							res.send(err);
+						group.token = jwt.sign(group,'secretkey',{noTimestamp:true});
+						group.update({$addToSet :{users: { deviceId:user.deviceId, username:user.username, as:"server"} }}, function(err,groupWithUsers){
+							if (err) res.send(err);
+							console.log(groupWithUsers);
+							group.save(function(err,savedGroup){
+								if (err) res.send(err);
+								user.update({$addToSet: {belongsTo: {as:"server", to:savedGroup._id} }},function(err){
+									if (err) res.send(err);
+									qr.saveSync({
+										//value:JSON.stringify('pandicam://'+group._id),
+										value:'pandicam://'+group._id,
+										size:10,
+										path:'/var/www/html/web/qr/'+group._id+'.png'
+									});
+									io.sockets.in(user._id.toString()).emit('new_group', savedGroup);
+									res.send({message:"Group Created",token:group.token,group:group});
+								});
+							});
+						});
+					});
+				}
+			});
+		}
+	});
+
+
+
+router.route("/group/delete")
+	.get(checkGroupAuth,function(req,res){
+		var userToken = req.token;
+		var groupToken = req.groupToken;
+		console.log(req.groupToken);
+		User.findOne({token:userToken},function(err, user){
+			if (err) res.send(err);
+			if (user == null){
+				res.send(403);
+			}
+
+			Group.findOneAndRemove({token:groupToken},function(err,group){
+				if (err) res.send(err);
+				user.update({$pull: {belongsTo:{as:"server",to:group._id}}},function(err){
+                    if (err) res.send(err);
+               });
+
+				//cleaning
+				var path = '/app/pandicam/uploads/' + group._id;
+				deleteFolderRecursive(path);
+				User.find(function(err,users){
+					users.forEach(function(element){
+						var temBelongs = [];
+						var belongs = element.belongsTo;
+						belongs.forEach(function(b){
+							if (b.to != group._id){
+								temBelongs.push(b);
+							}
+							else{
+								//is equal should be removed
+								io.sockets.in(element._id.toString()).emit('picgroup_deleted', {groupID:b.to});
+							}
+						});
+						if (temBelongs != belongs){
+							element.belongsTo = temBelongs;
+							element.save(function(err){
+								if (err) { console.log(err)}
+							})
+						}
+					});
+				})
+				io.sockets.in(user._id.toString()).emit('group_deleted', {groupID:group._id});
+				res.send({message:"removed"});
+			});
+		});
+	});
+
+
+
+
+router.route("/group/getPics")
+	.get(checkGroupAuth,function(req,res){
+		var userToken = req.token;
+		var groupToken = req.groupToken;
+		User.findOne({token:userToken},function(err, user){
+			if (err) res.send(err);
+			if (user == null){
+				res.send(403);
+			}
+		});
+		Group.findOne({token:groupToken},function(err, group){
+			if (err) res.send(err);
+			var working_directory = '/app/pandicam/uploads/'+group._id.toString()+'/images';
+			var dir = working_directory + '/tmp_copy'
+                        if (!fs.existsSync(dir)){
+                        	fs.mkdirSync(dir);
+                        }
+
+			zipImg(group.images,res);
+		});
+	});
+
+
+
+router.route("/group/get")
+	.get(checkAuth,function(req,res){
+		var token = req.token;
+		User.findOne({token:token},function(err,user){
+			if(err) res.send(err);
+			if (user != null){
+				var userGroups = user.belongsTo;///FixMe: modify later
+				var Ids=userGroups.map(function(a){return a.to});
+				console.log(Ids);
+				Group.find({_id: {$in:Ids}},function(err,groups){
+					if (err) res.send(err);
+					res.send(groups);
+				});
+
+			}
+			else { res.send(403) }
+		});
+	});
+
+
+router.route("/pic/remove")
+	.post(checkGroupAuth,function(req,res){
+		var userToken = req.token;
+		var groupToken = req.groupToken;
+		var pic = req.body.pic;
+		Group.findOne({token:groupToken},function(err,group){
+			if (err) res.send(err);
+			removeIndividualPic(group,pic);
+			res.send({message:"removed"});
+		});
+	});
+
+router.route("/file/remove")
+        .post(checkGroupAuth,function(req,res){
+                var userToken = req.token;
+                var groupToken = req.groupToken;
+                var file = req.body.file;
+                Group.findOne({token:groupToken},function(err,group){
+                        if (err) res.send(err);
+			removeFile(group,file);
+                        res.send({message:"removed"});
+                });
+        });
+
+
+
 router.route("/group/addFile")
 	.post(checkGroupAuth,function(req,res){
 		var userToken = req.token;
@@ -786,16 +577,6 @@ router.route("/group/addFile")
 									}
 								});
 							});
-
-
-
-
-						//},
-						//error:function(){
-						//	res.send({message:"nothing done"});
-						//}
-						//	});
-
 					}
 					else{
 						res.send(403);
@@ -844,14 +625,7 @@ router.route("/group/addFile")
 	}
 
 
-function testNotif(deviceID){
-	console.log("testing push notification to device " + deviceID);
-	var myDevice = new apn.Device(deviceID);
-	var note = new apn.Notification();
-	note.sound = "panda.caf";
-	note.alert = "Nueva imagen recibida";
-	apnConnection.pushNotification(note, myDevice);
-}
+
 
 function sendPushNotification(deviceID,image,img,number,name){
 	console.log("trying to notify peer "+deviceID);
@@ -865,23 +639,16 @@ function sendPushNotification(deviceID,image,img,number,name){
 	}
 	else{
 		var myDevice = new apn.Device(deviceID);
-                var note = new apn.Notification();
-                note.badge = Number(number) || 0;
+    var note = new apn.Notification();
+    note.badge = Number(number) || 0;
 		note.payload = {file:file};
 		note.alert = "Nuevo fichero recibido del grupo " + name;
 		note.sound = "panda.caf";
 	}
 	apnConnection.pushNotification(note, myDevice);
-
-//agentprod.createMessage()
-//.device(deviceID)
-//.alert('Nueva foto Pandicam')
-//.send();
 }
 
-function sendFilePushNotif(deviceID,image,img,number,name){
 
-}
 function deleteFolderRecursive(path){
 	if (path != null && path != undefined && path.indexOf("/app/pandicam/uploads/") > -1){
 		if( fs.existsSync(path) ) {
@@ -944,36 +711,12 @@ function removeIndividualPic(group,pic){
 	group.update({$pull: {images :{picid:pic.picid} } },function(err){
                 if (err) console.log(err);
         });
-
-
-
-
-	//group.update({$pull: {images :{picid:pic}}},function(err){
-	//	if (err) console.log(err);
-	//});
 }
 
 
-function download(uri, filename, group, callback){
-	request.head(uri, function(err, res, body){
-		console.log('content-type:', res.headers['content-type']);
-		console.log('content-length:', res.headers['content-length']);
-		request(uri).pipe(fs.createWriteStream(group+'/'+filename)).on('close', callback);
-	});
-}
 
 
-///edit later
-function uploaded(req, res) {
-	var filename = "33.jpg";
-	var filePath = path.join(__dirname, '..', '..', 'downloads', filename);
-	var stat = fs.statSync(filePath);
-	var fileToSend = fs.readFileSync(filePath);
-	res.set('Content-Type', 'image/jpeg');
-	res.set('Content-Length', stat.size);
-	res.set('Content-Disposition', filename);
-	res.send(fileToSend);
-}
+
 
 function checkAuth(req,res,next){
 	console.log("checking user token");
