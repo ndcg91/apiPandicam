@@ -1,6 +1,6 @@
-var export = module.exports
+var exports = module.exports
 
-export.upload = function(req,res){
+exports.upload = function(req,res){
   Group.findOne({token: req.groupToken},function(err,group){ //change later to Group
     if (err){
       res.send(error);
