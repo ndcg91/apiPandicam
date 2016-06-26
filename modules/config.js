@@ -51,7 +51,6 @@ app.use(function(req, res, next) {
 });
 
 mongoose.connect('mongodb://pandicamProject:TemporaL1718@188.166.68.124:27017/pandicam');
-io.on("connection", SocketManager.handleClient);
 
 
 
@@ -63,3 +62,5 @@ exports.multer          = multer;
 exports.app             = app;
 exports.port            = port;
 exports.io              = io;
+
+io.on("connection", SocketManager.handleClient);
