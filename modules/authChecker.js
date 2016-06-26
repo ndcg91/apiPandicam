@@ -21,8 +21,7 @@ exports.checkAuth = function(req,res,next){
 	}
 	else{
 		res.send(403)
-	}var User 									= require('./modules/database/user.js');
-  var Group 								= require('./modules/database/groups.js');
+	}
 }
 
 exports.checkGroupAuth = function(req,res,next){
