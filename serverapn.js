@@ -3,6 +3,9 @@ var cors 		= require('cors');
 var app 		= express();
 var server 		= require('http').createServer(app);
 var https		= require('https');
+var port = process.env.PORT || 8080;
+var router = express.Router();
+var io = require("socket.io").listen(server, { origins:'*:*'});
 var bodyParser 		= require('body-parser');
 var mongoose		= require('mongoose');
 var jwt			= require('jsonwebtoken');
@@ -18,7 +21,6 @@ var request = require('request');
 var fs = require('fs');
 var qr = require('qr-js');
 var gm = require('gm');
-var io = require("socket.io").listen(server, { origins:'*:*'});
 var pandicamApn = require('./modules/apn.js');
 var pandicamSocket = require('./modules/socket.js');
 var pandicamRegister = require('./modules/register.js');
@@ -69,11 +71,6 @@ app.use(function(req, res, next) {
 	next();
 });
 
-
-var port = process.env.PORT || 8080;
-
-
-var router = express.Router();
 
 router.use(function(req, res, next) {
 	console.log("algo ha pasado");
