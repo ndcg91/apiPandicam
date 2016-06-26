@@ -1,7 +1,7 @@
-var export = module.exports;
+var exports = module.exports;
 
 
-export.register = function(req,res){
+exports.register = function(req,res){
 		var user= new User();
 		user.username= req.body.username;
 		user.password= req.body.password;
