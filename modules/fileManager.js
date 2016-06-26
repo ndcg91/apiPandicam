@@ -95,7 +95,7 @@ exports.upload = function(req,res){
   });
 };
 
-export.addUserPic = function(req,res){
+exports.addUserPic = function(req,res){
   User.findOne({token: req.token},function(err,user){
     if (err){
       res.send(error);
