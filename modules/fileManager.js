@@ -18,6 +18,7 @@ exports.uploadLimiter = function(req,file,cb){
 
   console.log(remaining);
   console.log(fileSize);
+  console.log(file);
   // To reject this file pass `false`, like so:
 
   cb(null, false)
