@@ -14,18 +14,28 @@ exports.uploadLimiter = function(req,file,cb){
   var limit = req.group.groupMaxSize;
   var actual = req.group.groupCurrentSize;
   var remaining = (limit - actual);
-  var fileSize = file.size;
+  var fileSize = req.headers.content-length;
 
+  req.group.groupCurrentSize = actual + fileSize;
+  if (req.group.groupCurrentSize < req.group.groupMaxSize){
+
+    group.save(function(err,group){
+      if (err)  cb(null, false);
+      else {
+        cb(null, true)
+      }
+    });
+
+  }
+  else{
+    cb(null, false);
+  }
   console.log(remaining);
   console.log(fileSize);
-  console.log(file);
-  console.log(req.headers);
   // To reject this file pass `false`, like so:
 
-  cb(null, false)
 
   // To accept the file pass `true`, like so:
-  cb(null, true)
 }
 
 
