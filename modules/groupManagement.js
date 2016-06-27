@@ -25,6 +25,8 @@ exports.createGroup = function(req,res){
     newGroup.active = req.body.active;
     newGroup.pending = req.body.pending;
     newGroup.date = new Date();
+    newGroup.groupMaxSize = 31457280;
+    newGroup.groupCurrentSize = 0;
 
     newGroup.save(function(err,group){
       if (err) { res.send(err); return };
