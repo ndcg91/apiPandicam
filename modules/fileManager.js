@@ -45,6 +45,7 @@ exports.uploadLimiter = function(req,file,cb){
 
 
 exports.upload = function(req,res){
+  if (!req.file) res.sendStatus(403);
   var group = req.group;
   var user = req.user;
   console.log(req.file);
