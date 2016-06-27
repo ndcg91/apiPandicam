@@ -43,7 +43,8 @@ exports.uploadLimiter = function(req,file,cb){
 exports.upload = function(req,res){
   var group = req.group;
   var user = req.user;
-
+  console.log(req.file);
+  console.log(req.files);
   var dir = '/app/pandicam/uploads/'+group._id;
   if (!fs.existsSync(dir)){
         fs.mkdirSync(dir);
