@@ -8,13 +8,13 @@ var Group 	  = require('./database/groups.js');
 var apnManager= require('./apn.js');
 
 
-exports.uploadLimiter = function(req,res){
+exports.uploadLimiter = function(req,file,cb){
   // The function should call `cb` with a boolean
   // to indicate if the file should be accepted
   var limit = req.group.groupMaxSize;
   var actual = req.group.groupCurrentSize;
   var remaining = (limit - actual);
-  var fileSize = req.file.size;
+  var fileSize = file.size;
 
   console.log(remaining);
   console.log(fileSize);
