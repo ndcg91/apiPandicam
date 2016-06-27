@@ -9,7 +9,6 @@ var apnManager= require('./apn.js');
 
 
 exports.uploadLimiter = function(req,file,cb){
-  cb(null, true);
   // The function should call `cb` with a boolean
   // to indicate if the file should be accepted
   var group = req.group;
@@ -22,14 +21,16 @@ exports.uploadLimiter = function(req,file,cb){
   if (group.groupCurrentSize < group.groupMaxSize){
 
     group.save(function(err,newGroup){
-      if (err)  cb(null, false);
+      if (err)  {cb(null, false);console.log(err);return}
       else {
-        cb(null, true)
+        cb(null, true);
+        return;
       }
     });
 
   }
   else{
+    console.log("maximum size exeded");
     cb(null, false);
   }
   console.log(remaining);
