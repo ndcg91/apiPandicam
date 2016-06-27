@@ -12,7 +12,9 @@ var GroupSchema	=new Schema({
 	token:String,
 	blacklist:Array,
 	date:String,
-	files:Array
+	files:Array,
+	groupMaxSize:Number,
+	groupCurrentSize:Number,
 });
 
 module.exports = mongoose.model('Group',GroupSchema);

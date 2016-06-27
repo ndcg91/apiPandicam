@@ -43,7 +43,7 @@ exports.blacklist = function(req,res){
   User.findOne({username:userToBlackList},function(err,user){
     if (err) { res.send(err); return };
     if (user != null){
-      group.blacklist.push({blacklist:baduser._id,username:user.username});
+      group.blacklist.push({blacklist:user._id,username:user.username});
       group.save(function(err){
         if (err) { res.send(err); return };
         res.send({message:"user has been blacklisted "});
