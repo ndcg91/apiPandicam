@@ -7,6 +7,26 @@ var User 		  = require('./database/user.js');
 var Group 	  = require('./database/groups.js');
 var apnManager= require('./apn.js');
 
+
+exports.uploadLimiter = function(req,res){
+  // The function should call `cb` with a boolean
+  // to indicate if the file should be accepted
+  let limit = req.group.groupMaxSize;
+  let actual = req.group.groupCurrentSize;
+  let remaining = (limit - actual);
+  let fileSize = req.file.size;
+
+  console.log(remaining);
+  console.log(fileSize);
+  // To reject this file pass `false`, like so:
+
+  cb(null, false)
+
+  // To accept the file pass `true`, like so:
+  cb(null, true)
+}
+
+
 exports.upload = function(req,res){
   var group = req.group;
   var user = req.user;
