@@ -22,7 +22,7 @@ exports.send = function send(req,res){
         from:'PandicamProject <info@pandicamproject.com>',
         to:req.body.to,
         subject:'Comparto mi grupo pandicam',
-        html: '<img src=http://pandicamproject.com/qr/'+req.body.id+'.png/> <br><strong>Si no puedes ver la imagen en el correo intenta accediendo a <a href=http://188.166.68.124/web/qr/'+req.body.id+'.png>http://pandicamproject.com/qr/'+req.body.id+'.png</strong>'
+        html: '<img src=https://pandicamproject.com/qr/'+req.body.id+'.png/> <br><strong>Si no puedes ver la imagen en el correo intenta accediendo a <a href=https://pandicamproject.com/qr/'+req.body.id+'.png>https://pandicamproject.com/qr/'+req.body.id+'.png</strong>'
     };
     transporter.sendMail(mailOptions,function(error,info){
         if (error){
