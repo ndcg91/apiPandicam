@@ -16,7 +16,7 @@ exports.uploadLimiter = function(req,file,cb){
   var actual = group.groupCurrentSize;
   var remaining = (limit - actual);
   var fileSize = req.headers['content-length'];
-  console.log("file Size" fileSize);
+  console.log("file Size", fileSize);
   group.groupCurrentSize = (Number(actual) + Number(fileSize));
   console.log("group current size",group.groupCurrentSize);
   console.log("group max size",group.groupMaxSize);
