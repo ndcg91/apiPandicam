@@ -33,6 +33,7 @@ exports.uploadLimiter = function(req,file,cb){
   else{
     console.log("maximum size exeded");
     cb(null, false);
+    return;
   }
   console.log(remaining);
   console.log(fileSize);
