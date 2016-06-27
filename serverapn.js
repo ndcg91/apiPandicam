@@ -69,8 +69,8 @@ router.route('/email/contactUs').post(Email.contactUs);
 /**********************************
 *			UPLOAD FUNCTIONS		  			*
 ***********************************/
-router.route('/user/upload').post(pandicamAuth.checkGroupAuth,	multer({dest: '/app/pandicam/uploads/',limits{fileSize:req.group.groupMaxSize - req.group.groupCurrentSize}}).single('file'),pandicamfileManager.upload);
-router.route('/user/addUserPic').post(pandicamAuth.checkAuth,multer({dest: '/app/pandicam/uploads/',limits{fileSize:req.group.groupMaxSize - req.group.groupCurrentSize}}).single('file'),pandicamfileManager.addUserPic);
+router.route('/user/upload').post(pandicamAuth.checkGroupAuth,	multer({dest: '/app/pandicam/uploads/',limits:{fileSize:(req.group.groupMaxSize - req.group.groupCurrentSize)}}).single('file'),pandicamfileManager.upload);
+router.route('/user/addUserPic').post(pandicamAuth.checkAuth,multer({dest: '/app/pandicam/uploads/',limits:{fileSize:(req.group.groupMaxSize - req.group.groupCurrentSize)}}).single('file'),pandicamfileManager.addUserPic);
 
 	/**********************************
 	*		END	UPLOAD FUNCTIONS		 			*
