@@ -11,10 +11,10 @@ var apnManager= require('./apn.js');
 exports.uploadLimiter = function(req,res){
   // The function should call `cb` with a boolean
   // to indicate if the file should be accepted
-  let limit = req.group.groupMaxSize;
-  let actual = req.group.groupCurrentSize;
-  let remaining = (limit - actual);
-  let fileSize = req.file.size;
+  var limit = req.group.groupMaxSize;
+  var actual = req.group.groupCurrentSize;
+  var remaining = (limit - actual);
+  var fileSize = req.file.size;
 
   console.log(remaining);
   console.log(fileSize);
