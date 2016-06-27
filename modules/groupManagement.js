@@ -6,6 +6,8 @@ var Group 	       = require('./database/groups.js');
 var FileManager    = require('./fileManager.js');
 var SocketManager  = require('./socket.js');
 var apnManager     = require('./apn.js');
+var jwt						 = require('jsonwebtoken');
+
 
 exports.createGroup = function(req,res){
   var user = req.user;

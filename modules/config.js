@@ -21,7 +21,6 @@ var port 									= process.env.PORT || 8443;
 var router 								= express.Router();
 var bodyParser 						= require('body-parser');
 var mongoose							= require('mongoose');
-var jwt										= require('jsonwebtoken');
 var morgan								= require('morgan');
 var multer 								= require('multer');
 var pandicamSocket				= require('./socket.js');

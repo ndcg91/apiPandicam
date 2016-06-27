@@ -227,7 +227,7 @@ function zipImg(pics,res) {
 
 
 exports.cleanGroupFolder = function(groupID){
-  var path = '/app/pandicam/uploads/' + group._id;
+  var path = '/app/pandicam/uploads/' + groupID;
   deleteFolderRecursive(path);
 }
 function deleteFolderRecursive(path){
