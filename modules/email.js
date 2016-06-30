@@ -8,9 +8,9 @@ var fs            = require('fs');
 var ejs           = require('ejs');
 var path          = require('path');
 var appDir        = path.dirname(require.main.filename);
-var userContact   = fs.readFileSync(appDir + '/templates/userContact.ejs', 'utf-8');
-var shareGroup    = fs.readFileSync(appDir + '/templates/shareGroup.ejs', 'utf-8');
-var registered    = fs.readFileSync(appDir + '/templates/registered.ejs', 'utf-8');
+var userContact   = fs.readFileSync(appDir + '/modules/templates/userContact.ejs', 'utf-8');
+var shareGroup    = fs.readFileSync(appDir + '/modules/templates/shareGroup.ejs', 'utf-8');
+var registered    = fs.readFileSync(appDir + '/modules/templates/registered.ejs', 'utf-8');
 
 
 var transporter = nodemailer.createTransport({
