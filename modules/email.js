@@ -26,7 +26,7 @@ exports.send = function send(req,res){
       from:'PandicamProject <info@pandicamproject.com>',
       to:req.body.to,
       subject:'Comparto mi grupo pandicam',
-      html: ejs.render(shareGroup,req);
+      html: ejs.render(shareGroup,req)
     }
     sendEmail(res,mailOptions);
 };
