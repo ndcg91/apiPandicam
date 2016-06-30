@@ -4,7 +4,11 @@
 var exports       = module.exports = {};
 var nodemailer    = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
+var fs             = require('fs');
 var ejs           = require('ejs');
+var userContact   = fs.readFileSync('./templates/userContact.ejs', 'utf-8');
+var shareGroup    = fs.readFileSync('./templates/shareGroup.ejs', 'utf-8');
+var registered    = fs.readFileSync('./templates/registered.ejs', 'utf-8');
 
 
 var transporter = nodemailer.createTransport({
@@ -19,13 +23,11 @@ var transporter = nodemailer.createTransport({
 
 exports.send = function send(req,res){
     var mailOptions = {
-      ejs.render('./templates/shareGroup.ejs', req, function(err, str){
-        from:'PandicamProject <info@pandicamproject.com>',
-        to:req.body.to,
-        subject:'Comparto mi grupo pandicam',
-        html: str
-      }
-    });
+      from:'PandicamProject <info@pandicamproject.com>',
+      to:req.body.to,
+      subject:'Comparto mi grupo pandicam',
+      html: ejs.render(shareGroup,req);
+    }
     sendEmail(res,mailOptions);
 };
 
@@ -40,15 +42,13 @@ var mailOptions = {
 }
 
 exports.register = function(res,user){
-  ejs.render('./templates/registered.ejs', user.username, function(err, str){
-    var mailOptions = {
-      from:'PandicamProject <info@pandicamproject.com>',
-      to:user.email,
-      subject: 'Bienvenido a Pandicam!',
-      html:str
-    }
-    sendEmail(res,mailOptions);
-  });
+  var mailOptions = {
+    from:'PandicamProject <info@pandicamproject.com>',
+    to:user.email,
+    subject: 'Bienvenido a Pandicam!',
+    html:ejs.render(register,user.username);
+  }
+  sendEmail(res,mailOptions);
 }
 
 
@@ -63,14 +63,12 @@ exports.contactForm = function contactForm(req,res){
 }
 
 exports.contactUs = function contactUs(req,res){
-  ejs.render('./templates/userContact.ejs', req, function(err, str){
-  	var mailOptions = {
-    	from:'PandicamProject <info@pandicamproject.com>',
-    	to:["info@pandicamproject.com"],
-    	subject:'Solicitud de Contacto de usuario ' + req.body.name,
-    	html: str
-    };
-  });
+	var mailOptions = {
+  	from:'PandicamProject <info@pandicamproject.com>',
+  	to:["info@pandicamproject.com"],
+  	subject:'Solicitud de Contacto de usuario ' + req.body.name,
+  	html: ejs.render(contactUs,req)
+  };
   sendEmail(req,mailOptions);
 }
 
