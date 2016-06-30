@@ -1,5 +1,6 @@
 var exports = module.exports;
 var User 		= require('./database/user.js');
+var Email 								= require('./modules/email.js');
 var jwt			= require('jsonwebtoken');
 
 
