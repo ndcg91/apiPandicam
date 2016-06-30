@@ -74,7 +74,7 @@ exports.contactUs = function contactUs(req,res){
 
 
 
-func sendEmail(res,mailOptions){
+function sendEmail(res,mailOptions){
   transporter.sendMail(mailOptions,function(error,info){
       if (error){
           res.send(error);
