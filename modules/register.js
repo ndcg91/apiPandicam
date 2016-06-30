@@ -1,5 +1,6 @@
 var exports = module.exports;
 var User 		= require('./database/user.js');
+var jwt			= require('jsonwebtoken');
 
 
 exports.register = function(req,res){
