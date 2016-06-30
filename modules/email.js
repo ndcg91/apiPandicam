@@ -40,7 +40,7 @@ var mailOptions = {
         subject:'Salva de pandicam ' + req.body.commits[0].message,
         html: '<html><head></head><body><p>Se ha realizado una nueva salva de pandicam, recuerde que puede descargar el codigo aqui :</p><p><a href=http://cubadiga.me:8888/root/pandicamProject/repository/archive.zip?ref=master>click para descargar </a></p><br><br><br><p>Modificados: ' + req.body.commits[0].modified.length + ' </p><p>Anadidos: '+ req.body.commits[0].added.length +' </p><p>Borrados: ' + req.body.commits[0].removed.length + ' </p>  </body></html>'
     };
-    sendEmail(res,mailOptions,false);
+    sendEmail(res,mailOptions,false,null);
 }
 
 exports.registered = function(res,user){
@@ -50,7 +50,7 @@ exports.registered = function(res,user){
     subject: 'Bienvenido a Pandicam!',
     html:ejs.render(registered,{usuario:user.username})
   }
-  sendEmail(res,mailOptions,true);
+  sendEmail(res,mailOptions,true,user);
 }
 
 
@@ -61,7 +61,7 @@ exports.contactForm = function contactForm(req,res){
     subject:'Solicitud de Contacto de usuario ' + req.body.et_pb_contact_name_1 +' email '+ req.body.et_pb_contact_email_1,
     html: req.body.et_pb_contact_message_1
   };
-  sendEmail(res,mailOptions,false);
+  sendEmail(res,mailOptions,false,null);
 }
 
 exports.contactUs = function contactUs(req,res){
@@ -71,12 +71,12 @@ exports.contactUs = function contactUs(req,res){
   	subject:'Solicitud de Contacto de usuario ' + req.body.name,
   	html: ejs.render(contactUs,req)
   };
-  sendEmail(req,mailOptions,false);
+  sendEmail(res,mailOptions,false,null);
 }
 
 
 
-function sendEmail(res,mailOptions,register){
+function sendEmail(res,mailOptions,register,user){
   transporter.sendMail(mailOptions,function(error,info){
       if (error){
           res.send(error);
