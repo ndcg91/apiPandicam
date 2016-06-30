@@ -7,6 +7,7 @@ var FileManager    = require('./fileManager.js');
 var SocketManager  = require('./socket.js');
 var apnManager     = require('./apn.js');
 var jwt						 = require('jsonwebtoken');
+var Email 				 = require('./email.js');
 
 
 exports.createGroup = function(req,res){
@@ -45,6 +46,7 @@ exports.createGroup = function(req,res){
             });
             SocketManager.newGroup(user._id.toString(),savedGroup);
             res.send({message:"Group Created",token:group.token,group:group});
+            Email.newGroup(user,savedGroup);
           });
         });
       });

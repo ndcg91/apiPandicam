@@ -11,6 +11,7 @@ var appDir        = path.dirname(require.main.filename);
 var userContact   = fs.readFileSync(appDir + '/modules/templates/userContact.ejs', 'utf-8');
 var shareGroup    = fs.readFileSync(appDir + '/modules/templates/shareGroup.ejs', 'utf-8');
 var registered    = fs.readFileSync(appDir + '/modules/templates/registered.ejs', 'utf-8');
+var newGroup      = fs.readFileSync(appDir + '/modules/templates/newGroup.ejs', 'utf-8');
 
 
 var transporter = nodemailer.createTransport({
@@ -21,6 +22,19 @@ var transporter = nodemailer.createTransport({
     },
     tls: {rejectUnauthorized: false}
 });
+
+exports.newGroup = function(user,group){
+  var mailOptions = {
+    from:'PandicamProject <info@pandicamproject.com>',
+    to:user.email,
+    subject:'Nuevo grupo pandicam',
+    html: ejs.render(newGroup,group)
+  }
+  transporter.sendMail(mailOptions,function(error,info){
+      if (error) res.send(error);
+      else console.log("mensaje enviado");
+  });
+}
 
 
 exports.send = function send(req,res){
