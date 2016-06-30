@@ -46,7 +46,7 @@ exports.register = function(res,user){
     from:'PandicamProject <info@pandicamproject.com>',
     to:user.email,
     subject: 'Bienvenido a Pandicam!',
-    html:ejs.render(register,user.username);
+    html:ejs.render(register,user.username)
   }
   sendEmail(res,mailOptions);
 }
