@@ -36,7 +36,6 @@ exports.register = function(req,res){
             		user.save(function(err,user){
               		if (err) res.send(err);
 									Email.registered(user)
-              		res.json({message: 'User created!',id: user.id, token:user.token});
             		});
           		});
 
