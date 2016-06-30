@@ -88,6 +88,7 @@ function sendEmail(res,mailOptions,register){
             res.send({message:"mensaje enviado"});
           }
           else{
+            console.log(user);
             res.json({message: 'User created!',id: user.id, token:user.token});
           }
       }
