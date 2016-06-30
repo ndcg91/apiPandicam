@@ -4,8 +4,9 @@
 var exports       = module.exports = {};
 var nodemailer    = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
-var fs             = require('fs');
+var fs            = require('fs');
 var ejs           = require('ejs');
+var path          = require('path');
 var appDir        = path.dirname(require.main.filename);
 var userContact   = fs.readFileSync(appDir + '/templates/userContact.ejs', 'utf-8');
 var shareGroup    = fs.readFileSync(appDir + '/templates/shareGroup.ejs', 'utf-8');
