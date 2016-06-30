@@ -35,7 +35,7 @@ exports.register = function(req,res){
             		user.token = jwt.sign(user,'secretkey',{noTimestamp:true});
             		user.save(function(err,user){
               		if (err) res.send(err);
-									Email.registered(user)
+									Email.registered(res,user)
             		});
           		});
 
