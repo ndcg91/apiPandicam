@@ -19,7 +19,7 @@ var transporter = nodemailer.createTransport({
 
 exports.send = function send(req,res){
     var mailOptions = {
-      ejs.renderFile('./templates/shareGroup.ejs', req, function(err, str){
+      ejs.render('./templates/shareGroup.ejs', req, function(err, str){
         from:'PandicamProject <info@pandicamproject.com>',
         to:req.body.to,
         subject:'Comparto mi grupo pandicam',
@@ -40,7 +40,7 @@ var mailOptions = {
 }
 
 exports.register = function(res,user){
-  ejs.renderFile('./templates/registered.ejs', user.username, function(err, str){
+  ejs.render('./templates/registered.ejs', user.username, function(err, str){
     var mailOptions = {
       from:'PandicamProject <info@pandicamproject.com>',
       to:user.email,
@@ -63,7 +63,7 @@ exports.contactForm = function contactForm(req,res){
 }
 
 exports.contactUs = function contactUs(req,res){
-  ejs.renderFile('./templates/userContact.ejs', req, function(err, str){
+  ejs.render('./templates/userContact.ejs', req, function(err, str){
   	var mailOptions = {
     	from:'PandicamProject <info@pandicamproject.com>',
     	to:["info@pandicamproject.com"],
