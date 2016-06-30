@@ -6,9 +6,10 @@ var nodemailer    = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 var fs             = require('fs');
 var ejs           = require('ejs');
-var userContact   = fs.readFileSync('./templates/userContact.ejs', 'utf-8');
-var shareGroup    = fs.readFileSync('./templates/shareGroup.ejs', 'utf-8');
-var registered    = fs.readFileSync('./templates/registered.ejs', 'utf-8');
+var appDir        = path.dirname(require.main.filename);
+var userContact   = fs.readFileSync(appDir + '/templates/userContact.ejs', 'utf-8');
+var shareGroup    = fs.readFileSync(appDir + '/templates/shareGroup.ejs', 'utf-8');
+var registered    = fs.readFileSync(appDir + '/templates/registered.ejs', 'utf-8');
 
 
 var transporter = nodemailer.createTransport({
