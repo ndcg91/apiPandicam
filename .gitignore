@@ -1,3 +1,5 @@
+uploads
+upload
 /uploads/*
 /upload/*
 /node_modules/*
