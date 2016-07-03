@@ -1,4 +1,5 @@
 var exports = module.exports;
+var mongoose                                                    = require('mongoose');
 var User 		= require('./database/user.js');
 var Group 	= require('./database/groups.js');
 
@@ -107,7 +108,7 @@ exports.removeGroup = function(req,res){
     function(err,group){
       if (err) { res.send(err); return }
       User.update(
-        {token:userToken},
+        {token:user.token},
         {$pull: {belongsTo: {to:mongoose.Types.ObjectId(groupId)}}},
         function(err){
           if (err){
