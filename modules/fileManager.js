@@ -153,6 +153,7 @@ function addPic(user,group,pic,res){
     }
     console.log("image updated");
     res.send({message:"updated", results:group});
+    pic.groupid = group._id;
     io.sockets.in(group._id.toString()).emit('new_pic', { pic: pic });
     var users = group.users;
     users.forEach(function(user){
