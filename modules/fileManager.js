@@ -2,7 +2,7 @@ var exports   = module.exports
 var fs 			  = require('fs');
 var gm 			  = require('gm');
 var archiver 	= require('archiver');
-
+var config	= require('./config.js');
 var User 		  = require('./database/user.js');
 var Group 	  = require('./database/groups.js');
 var apnManager= require('./apn.js');
@@ -12,15 +12,15 @@ exports.uploadLimiter = function(req,file,cb){
   // The function should call `cb` with a boolean
   // to indicate if the file should be accepted
   var group = req.group;
-  var limit = group.groupMaxSize;
+  var limit = config.groupMaxSize;
   var actual = group.groupCurrentSize;
   var remaining = (limit - actual);
   var fileSize = req.headers['content-length'];
   console.log("file Size", fileSize);
   group.groupCurrentSize = (Number(actual) + Number(fileSize));
   console.log("group current size",group.groupCurrentSize);
-  console.log("group max size",group.groupMaxSize);
-  if (group.groupCurrentSize < group.groupMaxSize){
+  console.log("group max size",config.groupMaxSize);
+  if (group.groupCurrentSize < config.groupMaxSize){
     group.save(function(err,newGroup){
       if (err)  {cb(null, false);console.log(err);return}
       else {
@@ -140,6 +140,7 @@ exports.addUserPic = function(req,res){
 }
 
 function addPic(user,group,pic,res){
+  console.log("add pic called");
   group.update({$addToSet: {images:pic}},function(err){
     if (err){
       //cleaning

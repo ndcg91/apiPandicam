@@ -9,7 +9,7 @@ var apnManager     = require('./apn.js');
 var jwt						 = require('jsonwebtoken');
 var Email 				 = require('./email.js');
 
-
+var config = require('./config.js');
 exports.createGroup = function(req,res){
   var user = req.user;
   if (req.body.groupName == null || req.body.password == null ||req.body.active == null ||req.body.pending == null ){
@@ -26,7 +26,7 @@ exports.createGroup = function(req,res){
     newGroup.active = req.body.active;
     newGroup.pending = req.body.pending;
     newGroup.date = new Date();
-    newGroup.groupMaxSize = 31457280;
+    newGroup.groupMaxSize = config.groupMaxSize;
     newGroup.groupCurrentSize = 0;
 
     newGroup.save(function(err,group){

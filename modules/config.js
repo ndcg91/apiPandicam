@@ -60,4 +60,5 @@ exports.apn             = apn;
 exports.multer          = multer;
 exports.app             = app;
 exports.port            = port;
+exports.groupMaxSize	= 251658240;
 var SocketManager       = require('./socket.js');

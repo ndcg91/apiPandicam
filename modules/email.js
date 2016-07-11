@@ -30,8 +30,9 @@ exports.newGroup = function(user,group){
     subject:'Nuevo grupo pandicam',
     html: ejs.render(newGroup,group)
   }
+  console.log(user);
   transporter.sendMail(mailOptions,function(error,info){
-      if (error) res.send(error);
+      if (error) console.log(error);
       else console.log("mensaje enviado");
   });
 }
