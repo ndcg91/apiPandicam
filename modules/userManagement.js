@@ -33,16 +33,16 @@ exports.buildUser = function(req,res){
   });
   var belongsPandicam = user.belongsTo.filter(elem => {
     // body...
-    return element.as == "server"
+    return elem.as == "server"
   });
 
   var picsIdArray = belongsPics.map( elem => {
     // body...
-    return element.as
+    return elem.as
   });
   var pandicamIdArray = belongsPandicam.map( elem => {
     // body...
-    return element.as
+    return elem.as
   });
   Group.find({_id:{$in:picsIdArray}},function(err,picsGroups){
     if (err) {console.log(err);res.send(err);return}
