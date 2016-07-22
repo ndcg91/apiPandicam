@@ -16,6 +16,34 @@ exports.getUser = function(req,res){
   res.send(req.user);
 }
 
+exports.buildUser = function(req,res){
+  var fullUser = {}
+  var user = req.user;
+  fullUser.username = user.username
+  fullUser.password = user.password
+  fullUser.deviceId = user.deviceId
+  fullUser.token = user.token
+  fullUser.email = user.email
+  fullUser.pandicamGroups = []
+  fullUser.picGroups = []
+
+  user.belongsTo.forEach(belongs => {
+    // body...
+      var groupID = belongs.to
+      Group.findOne({_id:groupID},function(err,group){
+        if (belongs.as == "client"){
+          fullUser.picGroups.push(group)
+        }
+        else{
+          fullUser.pandicamGroups.push(group)
+        }
+      })
+
+    }
+  });
+  res.send(fullUser)
+}
+
 
 
 /**
@@ -27,7 +55,7 @@ exports.addDeviceId = function(req,res){
   user.deviceId = req.body.deviceId;
   deviceId  = req.body.deviceId;
   //Add a new DeviceID
-  
+
   //Find if exist
   Device.findOne({deviceID:deviceId},function(err,device){
 	if (err || device == null){

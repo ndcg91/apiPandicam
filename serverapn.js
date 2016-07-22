@@ -81,6 +81,8 @@ router.route('/user/addUserPic').post(pandicamAuth.checkAuth,multer({dest: '/app
 	/**********************************
 	*			USER MANAGEMENT 		  			*
 	***********************************/
+//get user with all the information in a single request
+router.route('/user/fullInfo').get(pandicamAuth.checkAuth,pandicamUserManagement.buildUser);
 router.route('/user/get').get(pandicamAuth.checkAuth,pandicamUserManagement.getUser);
 router.route('/user/addDeviceId').post(pandicamAuth.checkAuth,pandicamUserManagement.addDeviceId);
 router.route("/group/addSelf").post(pandicamAuth.checkAuth,pandicamUserManagement.addGroup);
