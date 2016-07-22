@@ -28,7 +28,19 @@ exports.newGroup = function(user,group){
     from:'PandicamProject <info@pandicamproject.com>',
     to:user.email,
     subject:'Nuevo grupo pandicam',
-    html: ejs.render(newGroup,group)
+    attachments: [
+	{filename: 'qr.png',
+	path: '/var/www/html/web/qr/'+group._id+'.png',
+	cid: 'qr'},
+	{filename: 'head.png',
+        path: '/app/pandicamDev/modules/templates/images/pandimail.png',
+        cid: 'head'},
+	{filename: 'foot.png',
+        path: '/app/pandicamDev/modules/templates/images/pandimailpie.png',
+        cid: 'foot'},
+	
+    ],
+    html: ejs.render(newGroup,{user:user,group:group})
   }
   console.log(user);
   transporter.sendMail(mailOptions,function(error,info){
@@ -39,11 +51,24 @@ exports.newGroup = function(user,group){
 
 
 exports.send = function send(req,res){
+    console.log(req.body);
     var mailOptions = {
       from:'PandicamProject <info@pandicamproject.com>',
       to:req.body.to,
       subject:'Comparto mi grupo pandicam',
-      html: ejs.render(shareGroup,req)
+      attachments: [
+        {filename: 'qr.png',
+        path: '/var/www/html/web/qr/'+req.body.id+'.png',
+        cid: 'qr'},
+        {filename: 'head.png',
+        path: '/app/pandicamDev/modules/templates/images/pandimail.png',
+        cid: 'head'},
+        {filename: 'foot.png',
+        path: '/app/pandicamDev/modules/templates/images/pandimailpie.png',
+        cid: 'foot'},
+
+      ],
+      html: ejs.render(shareGroup,{group:req.group,user:req.user})
     }
     sendEmail(res,mailOptions,false);
 };

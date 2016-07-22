@@ -3,6 +3,7 @@ var config	= require('./config.js');
 var server  = config.server;
 var Group 	= require('./database/groups.js');
 var User 		= require('./database/user.js');
+var Device = require('./database/devices.js');
 
 
 var socketio = require('socket.io')
@@ -36,6 +37,19 @@ var handleClient = function(socket) {
 	socket.emit("connected_now", { connected: 'connect' });
 
   //User has joined a group
+	socket.on('clearBadge',function(data){
+		var deviceID = data.deviceID;
+		console.log("clear badge called");
+		Device.findOne({deviceID:deviceID},function(err,device){
+			console.log(device);
+			console.log(deviceID);
+			if (!err && device != null){
+				device.badge = 0;
+				device.save();
+			}
+		})	
+	})
+	
 	socket.on('join',function(data){
 		console.log("joining to group"  + data.groupId);
 		socket.join(data.groupId);

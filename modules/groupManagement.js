@@ -12,19 +12,17 @@ var Email 				 = require('./email.js');
 var config = require('./config.js');
 exports.createGroup = function(req,res){
   var user = req.user;
-  if (req.body.groupName == null || req.body.password == null ||req.body.active == null ||req.body.pending == null ){
+  if (req.body.groupName == null || req.body.password == null){
     if (req.body.groupName == null) res.send({message:"group name cannot be null"});
     if (req.body.password == null) res.send({message:"password cannot be null"});
-    if (req.body.active == null) res.send({message:"active cannot be null"});
-    if (req.body.pending == null) res.send({message:"pending cannot be null"});
   }
   else{
     var newGroup = new Group();
     newGroup.groupName = req.body.groupName;
     newGroup.groupDescription = req.body.groupDescription;
     newGroup.password = req.body.password;
-    newGroup.active = req.body.active;
-    newGroup.pending = req.body.pending;
+    newGroup.active = false;
+    newGroup.pending = false;
     newGroup.date = new Date();
     newGroup.groupMaxSize = config.groupMaxSize;
     newGroup.groupCurrentSize = 0;
@@ -45,7 +43,7 @@ exports.createGroup = function(req,res){
               path:'/var/www/html/web/qr/'+group._id+'.png'
             });
             SocketManager.newGroup(user._id.toString(),savedGroup);
-            res.send({message:"Group Created",token:group.token,group:group});
+            res.send(group);
             Email.newGroup(user,savedGroup);
           });
         });

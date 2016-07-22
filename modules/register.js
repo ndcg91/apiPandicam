@@ -65,6 +65,7 @@ exports.login = function(req,res){
 		User.findOne({username: username},function(err,user){
 		 if (err) res.send(err);
 		 if (user != null){
+			 console.log(user);
 			 if (user.password == password){
 				 //res.header("Access-Control-Allow-Origin", "*");
 				 //res.send(user);

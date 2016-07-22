@@ -159,6 +159,7 @@ function addPic(user,group,pic,res){
     var users = group.users;
     users.forEach(function(user){
       User.findOne({username:user.username},function(err,finalUser){
+	console.log(finalUser);
         if (!err) apnManager.sendPushNotification(finalUser.deviceId,true,pic,group.images.count,group.groupName);
       });
     });

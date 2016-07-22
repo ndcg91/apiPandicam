@@ -1,7 +1,9 @@
+
 var exports = module.exports;
 var mongoose                                                    = require('mongoose');
 var User 		= require('./database/user.js');
 var Group 	= require('./database/groups.js');
+var Device = require('./database/devices.js');
 
 
 
@@ -23,6 +25,25 @@ exports.getUser = function(req,res){
 exports.addDeviceId = function(req,res){
   var user = req.user;
   user.deviceId = req.body.deviceId;
+  deviceId  = req.body.deviceId;
+  //Add a new DeviceID
+  
+  //Find if exist
+  Device.findOne({deviceID:deviceId},function(err,device){
+	if (err || device == null){
+		var dev = new Device();
+		dev.deviceID = deviceId;
+		dev.save()
+	}
+	else{
+		device.deviceID = deviceId;
+		device.save(function(err,newDevice){
+			console.log(newDevice);
+		});
+	}
+  })
+
+
   user.save(function(err){
     if (err) { res.send(err);return }
     else {res.send({message:"device id updated"});return}

@@ -51,7 +51,7 @@ router.route("/user/login")	.post(pandicamRegister.login);
 *			END LOGIN AND register			*
 ***********************************/
 
-
+router.route('/apnTest').get(pandicamApn.testApn)
 
 /**********************************
 *			EMAIL FUNCTIONS   					*
