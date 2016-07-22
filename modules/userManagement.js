@@ -39,7 +39,7 @@ exports.buildUser = function(req,res){
         }
       })
 
-    }
+   
   });
   res.send(fullUser)
 }
