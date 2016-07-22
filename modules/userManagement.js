@@ -54,19 +54,8 @@ exports.buildUser = function(req,res){
 
     })
   })
-  user.belongsTo.forEach(belongs => {
-    // body...
-      var groupID = belongs.to
-      Group.findOne({_id:groupID},function(err,group){
-        if (belongs.as == "client"){
-          fullUser.picGroups.push(group)
-        }
-        else{
-          fullUser.pandicamGroups.push(group)
-        }
-      })
-  });
-  res.send(fullUser)
+
+
 }
 
 
