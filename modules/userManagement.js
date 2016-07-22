@@ -25,6 +25,7 @@ exports.buildUser = function(req,res){
   fullUser.deviceId = user.deviceId;
   fullUser.token = user.token;
   fullUser.email = user.email;
+  fullUser.free = user.free;
   fullUser.pandicamGroups = [];
   fullUser.picGroups = [];
 
