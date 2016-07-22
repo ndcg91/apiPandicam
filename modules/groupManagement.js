@@ -58,8 +58,10 @@ exports.createGroup = function(req,res){
 exports.deleteGroup = function(req,res){
   var user = req.user;
   var group = req.group;
+  console.log("removing group",group.groupName);
   Group.findOneAndRemove({token:group.token},function(err,group){
-    if (err) { res.send(err); return };
+    if (err) { console.log(err);res.send(err); return };
+    console.log("no error")
     user.update({$pull: {belongsTo:{as:"server",to:group._id}}},function(err){
       if (err) { res.send(err); return };
     });
