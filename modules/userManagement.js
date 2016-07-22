@@ -38,12 +38,13 @@ exports.buildUser = function(req,res){
 
   var picsIdArray = belongsPics.map( elem => {
     // body...
-    return elem.to
+    return mongoose.Types.ObjectId(elem.to)
   });
   var pandicamIdArray = belongsPandicam.map( elem => {
     // body...
-    return elem.to
+    return mongoose.Types.ObjectId(elem.to)
   });
+  console.log(pandicamIdArray)
   Group.find({_id:{$in:picsIdArray}},function(err,picsGroups){
     if (err) {console.log(err);res.send(err);return}
     else {fullUser.picGroups = picsGroups};
