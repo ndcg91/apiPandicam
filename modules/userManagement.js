@@ -27,6 +27,32 @@ exports.buildUser = function(req,res){
   fullUser.pandicamGroups = []
   fullUser.picGroups = []
 
+  var belongsPics = user.belongsTo.filter(elem => {
+    // body..
+    return elem.as == "client"
+  });
+  var belongsPandicam = user.belongsTo.filter(elem => {
+    // body...
+    return element.as == "server"
+  });
+
+  var picsIdArray = belongsPics.map( elem => {
+    // body...
+    return element.as
+  });
+  var pandicamIdArray = belongsPandicam.map( elem => {
+    // body...
+    return element.as
+  });
+  Group.find({_id:{$in:picsIdArray}},function(err,picsGroups){
+    if (err) {console.log(err);res.send(err);return}
+    else {fullUser.picGroups = picsGroups};
+    Group.find({_id:{$in:pandicamIdArray}},function(err,pandicamGroups){
+      if (err) {console.log(err);res.send(err);return}
+      else {fullUser.pandicamGroups = pandicamGroups;res.send(fullUser)};
+
+    })
+  })
   user.belongsTo.forEach(belongs => {
     // body...
       var groupID = belongs.to
@@ -38,8 +64,6 @@ exports.buildUser = function(req,res){
           fullUser.pandicamGroups.push(group)
         }
       })
-
-   
   });
   res.send(fullUser)
 }
