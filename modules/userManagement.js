@@ -17,15 +17,16 @@ exports.getUser = function(req,res){
 }
 
 exports.buildUser = function(req,res){
-  var fullUser = {}
+  var fullUser = {};
   var user = req.user;
-  fullUser.username = user.username
-  fullUser.password = user.password
-  fullUser.deviceId = user.deviceId
-  fullUser.token = user.token
-  fullUser.email = user.email
-  fullUser.pandicamGroups = []
-  fullUser.picGroups = []
+  fullUser._id = user._id;
+  fullUser.username = user.username;
+  fullUser.password = user.password;
+  fullUser.deviceId = user.deviceId;
+  fullUser.token = user.token;
+  fullUser.email = user.email;
+  fullUser.pandicamGroups = [];
+  fullUser.picGroups = [];
 
   var belongsPics = user.belongsTo.filter(elem => {
     // body..
