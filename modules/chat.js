@@ -9,7 +9,9 @@ Group.find({},function(err,groups){
   groups.forEach(group => {
     var dbRef = firebaseDB.ref('messages/' + group._id);
     dbRef.on("child_added",function(snapshot){
-      console.log(snapshot.val(),group._id);
+      group.chats = snapshot.numChildren();
+      console.log(snapshot.numChildren());
+      group.save();
     },function(err){console.log(err)})
   });
 })
