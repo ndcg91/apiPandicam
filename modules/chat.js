@@ -9,6 +9,5 @@ Group.find({},function(err,groups){
     dbRef.on("value",function(snapshot){
       console.log(snapshot.val());
     })
-
   });
 })

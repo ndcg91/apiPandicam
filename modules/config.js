@@ -19,7 +19,7 @@ firebase.initializeApp({
     storageBucket: "pandicam-e5902.appspot.com",
  });
  var firebaseDB = firebase.database();
-
+ var chats = require('chat.js');
 
 
 
