@@ -15,6 +15,7 @@ var GroupSchema	=new Schema({
 	files:Array,
 	groupMaxSize:Number,
 	groupCurrentSize:Number,
+	chats:Array
 });
 
 module.exports = mongoose.model('Group',GroupSchema);

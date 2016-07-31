@@ -4,12 +4,13 @@ var server  = config.server;
 var Group 	= require('./database/groups.js');
 var User 		= require('./database/user.js');
 var Device = require('./database/devices.js');
-
+var apnManager     = require('./apn.js');
 
 var socketio = require('socket.io')
 
 module.exports.listen = function(server){
-    io = socketio.listen(server,{ origins:'*:*'})
+    io = socketio.listen(server,{ origins:'*:*',pingInterval:1000,pingTimeout:6000})
+      //io = socketio.listen(server,{ origins:'*:*'})
 		io.on("connection", handleClient);
     return io
 }
@@ -32,6 +33,7 @@ Group.find({},function(err,groups){
 
 
 var handleClient = function(socket) {
+
 	// we've got a client connection
 	console.log("client connected");
 	socket.emit("connected_now", { connected: 'connect' });
@@ -57,13 +59,34 @@ var handleClient = function(socket) {
 
   //User leave a group or logout
 	socket.on('leave',function(data){
+		console.log("leaving group",data)
 		socket.leave(data.groupId)
 	});
+	socket.on('disconnect', function () {
+		console.log("client has been disconnected");
+        });
+   
 
   //emit broadcast to group
-	socket.on('broadcast',function(data){
+	socket.on('broadcast',function(data,callback){
+		callback();
 		console.log(data);
-		io.to(data.groupId).emit(data.event,data.data);
+		io.to(data.groupId).emit(data.event,data);
+		if (data.event == "chat"){
+			var chatObject = data.data;
+			Group.findOne({_id:data.groupId},function(err,group){
+				group.update({$addToSet: {chats:chatObject}},function(err){
+					if (err){
+						console.log(err)
+					}
+					else{
+						console.log("newchat")
+						apnManager.notifyChatGroup(group._id,chatObject);
+					}
+				});
+			})
+			
+		}
 	});
 
   //User login

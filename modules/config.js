@@ -3,7 +3,6 @@ var express 							= require('express');
 var cors 									= require('cors');
 var app 									= express();
 var https									= require('https');
-
 read = require('fs').readFileSync,
 httpsOptions = {
 	key: read('ssl/api_pandicamproject_com.key', 'utf8'),
@@ -12,7 +11,13 @@ httpsOptions = {
 };
 var server 		= require('https').createServer(httpsOptions,app);
 var io        = require('./socket.js').listen(server);
-
+var firebase = require('firebase');
+var firebaseApp = firebase.initializeApp({ 
+    apiKey: "AIzaSyCJSTwqOJGPiI4tRpVnRvpyYNUuDaynoC8",
+    authDomain: "pandicam-e5902.firebaseapp.com",
+    databaseURL: "https://pandicam-e5902.firebaseio.com",
+    storageBucket: "pandicam-e5902.appspot.com",
+ });
 
 
 
@@ -61,4 +66,6 @@ exports.multer          = multer;
 exports.app             = app;
 exports.port            = port;
 exports.groupMaxSize	= 251658240;
+exports.firebaseApp 	= firebaseApp;
 var SocketManager       = require('./socket.js');
+
