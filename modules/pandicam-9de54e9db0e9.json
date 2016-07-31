@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "pandicam-e5902",
+  "private_key_id": "9de54e9db0e9f57207cb7efcbd01937e2c17d7ad",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCyE1YsjNLiYZRR\nhM22YIQ4M44E3Xu0esHIkzI/g/yItt23pD3iyuRGOufYKZPpgMC5Etph5dQ7BOI2\nonwUQt8xI5HOeorMzalVBVrtV+CZzXjmfXkASkvCrLgLiO6aJ5Yt6uP//bVRGmV2\nK3VaNfVAtMvmxBQvDj/Z34FXZl++NtDW7VnePh1HQJpDGxPEAqzTz8dGh7zfNAoQ\nJ/KT1D3H7BH3Qbn8Y/GFd4LfYnRcDOxrDkwphNWgxUOeDzjr9Q+uq5sERj2n9VkU\nCvctmiJOTW451fCFxPH33fKHUHoWOxjh5lKj6bfwublQ3sSsEaPXDGt5Ic5OrbEF\nrSs2j5fBAgMBAAECggEBAJtn+KqEc34RPokt5wEklf8eLvDcAZtuDjPnEdEQdJEz\nVadwdHm6KyGHQtII5wa+0HIzm9YX5vFiv7CCeNqNyY5uxk517y/ww7hpJgM/z8kp\n4jr0gWbZb+iDJ1MZu3FY3t1Pwo6jcVtIOAe6wX1q3ZAMuG257Qtr2hlfztbhhujO\nH7LVr0eScCtcxVC4cJdx5Bt8D42njRp7x928Fm59Uw8cBmgN8ubUo4h+f0ymg8iL\nz87MERJW6j9erlOlj0xMdmE5IWFk45r+3uYHPneJmMsf6DBbLFV2C4fONKmm4Xym\n5tzCr19Ba5+T5M1DKiWyJ0Ut2UaHrtAk3TqXHd8Fm8kCgYEA/UIbcyaohhbJ3/11\nrjyhJv3JoYZcS+JW45RMgKDgr1fvvSAmFPtfInYKmYpFvDG/Lp4Nsr60MOz0ZEwx\nwiBuV0y4qCE2op54cK5QoD3DiY4dpk+b3DDHJd1+75oDdc2zzOPAkRdoK4avuzvN\nk9sSIOeDY8UA8UnBHP7yaMnEfgsCgYEAtADdPi5upEKWXGUT3gFU6594R9mdgRMG\naJHOxLLY6ImJ6xAvLGrOda20lP2bekQ2aTOnxPCjalD2wi36Ig5fL2sprbQiKJq0\ndt0+yDPvjafuvST/4SRF4hlFbvpkBKubfFpYlbheA51KlFPI8Rw2GvYZ3L3IhOWK\nN3KAP0lj/OMCgYBz60c/LKmkPlgGgy/TIYMtoqogmawzO5VDs4RUt84/08My0L09\ni1UfI+J0JrsGicqVHtjsQKefYUX3hnyb+1Yl9ULsCc/FHT3JbbAPuFWA56Cgl/2i\nCl2M8lYAe4Er8YxjsrdYcdtHWO2kiJnvHC2vC+iyyOBGkNioWfVAi2G5wwKBgQCL\nLN/jZCNH/fQkHELwNDdktzhY1Xlig0NBNvuYOnBb23w3s5vFzA82DcjCKhQ8xOEN\nFlNxgl3XpiIkoUf1bQdLsp/XHqAKpRNDlG0mfoGKFX4R4Lm3akRePQvictdChS0D\nSReVK6gFQ2iWpvGG+zkaP45fjp2ro47qsC1YwXX94QKBgQDuIvDOInM9ivhCNap0\nySyoD/PZk7SDKx/lEeKIAolYb19oh1idgnYk9+rFfDbakIStVn2oNURR2/9T9Cbr\nXeGAmtVRNkmPk68USLNP/xjlNSc9jsy1j7YMlBmO6/uS7Pc+iGcrrmExc1i5iFVz\nNmVIdXg3LVHpSwoyzNNON6kyEQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "pandicamapi@pandicam-e5902.iam.gserviceaccount.com",
+  "client_id": "109067002419479841113",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pandicamapi%40pandicam-e5902.iam.gserviceaccount.com"
+}

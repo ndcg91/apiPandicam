@@ -13,10 +13,8 @@ var server 		= require('https').createServer(httpsOptions,app);
 var io        = require('./socket.js').listen(server);
 var firebase = require('firebase');
 firebase.initializeApp({
-    apiKey: "AIzaSyCJSTwqOJGPiI4tRpVnRvpyYNUuDaynoC8",
-    authDomain: "pandicam-e5902.firebaseapp.com",
-    databaseURL: "https://pandicam-e5902.firebaseio.com",
-    storageBucket: "pandicam-e5902.appspot.com",
+    serviceAccount: '/app/pandicamDev/modules/pandicam.json',
+    databaseURL: "https://pandicam-e5902.firebaseio.com"
  });
  var firebaseDB = firebase.database();
 
