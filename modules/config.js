@@ -19,7 +19,6 @@ firebase.initializeApp({
     storageBucket: "pandicam-e5902.appspot.com",
  });
  var firebaseDB = firebase.database();
- var chats = require('./chat.js');
 
 
 
@@ -70,3 +69,4 @@ exports.port            = port;
 exports.groupMaxSize		= 251658240;
 exports.firebaseDB 			= firebaseDB;
 var SocketManager       = require('./socket.js');
+var chats = require('./chat.js');
