@@ -12,12 +12,14 @@ httpsOptions = {
 var server 		= require('https').createServer(httpsOptions,app);
 var io        = require('./socket.js').listen(server);
 var firebase = require('firebase');
-var firebaseApp = firebase.initializeApp({ 
+firebase.initializeApp({
     apiKey: "AIzaSyCJSTwqOJGPiI4tRpVnRvpyYNUuDaynoC8",
     authDomain: "pandicam-e5902.firebaseapp.com",
     databaseURL: "https://pandicam-e5902.firebaseio.com",
     storageBucket: "pandicam-e5902.appspot.com",
  });
+ var firebaseDB = firebase.database();
+
 
 
 
@@ -65,7 +67,6 @@ exports.apn             = apn;
 exports.multer          = multer;
 exports.app             = app;
 exports.port            = port;
-exports.groupMaxSize	= 251658240;
-exports.firebaseApp 	= firebaseApp;
+exports.groupMaxSize		= 251658240;
+exports.firebaseDB 			= firebaseDB;
 var SocketManager       = require('./socket.js');
-
