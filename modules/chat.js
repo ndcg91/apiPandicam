@@ -10,11 +10,10 @@ Group.find({},function(err,groups){
     var dbRef = firebaseDB.ref('messages/' + group._id);
     dbRef.on("value",function(snapshot){
       if (group.chats != snapshot.numChildren(){
-
         console.log(group.groupName, "updating chat", snapshot.val())
       }
       group.chats = snapshot.numChildren();
-      console.log(snapshot.numChildren());
+      console.log(snapshot.exportVal().numChildren());
       group.save();
     },function(err){console.log(err)})
   });
