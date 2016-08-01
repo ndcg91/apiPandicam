@@ -13,7 +13,7 @@ Group.find({},function(err,groups){
         console.log(group.groupName, "updating chat", snapshot.val())
       }
       group.chats = snapshot.numChildren();
-      console.log(snapshot.exportVal());
+      console.log(snapshot.numChildren());
       group.save();
     },function(err){console.log(err)})
   });
